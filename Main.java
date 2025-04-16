@@ -1,0 +1,101 @@
+package com.brandongcobb.vyrtuous;
+
+import com.brandongcobb.vyrtuous.bots.DiscordBot;
+//import com.brandongcobb.vyrtuous.Bots.LinkedInBot;
+//import com.brandongcobb.vyrtuous.Bots.TwitchBot;
+import com.brandongcobb.vyrtuous.Config;
+import com.brandongcobb.vyrtuous.utils.handlers.AIManager;
+import com.brandongcobb.vyrtuous.utils.handlers.MessageManager;
+import com.brandongcobb.vyrtuous.utils.include.Helpers;
+//import com.brandongcobb.vyrtuous.Security.DiscordOAuth;
+//import com.brandongcobb.vyrtuous.Security.LinkedInOAuth;
+//import com.brandongcobb.vyrtuous.Security.PatreonOAuth;
+//import com.brandongcobb.vyrtuous.Security.TwitchOAuth;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+
+public class Main {
+
+    public Config config;
+    public HikariDataSource dbPool;
+    public AIManager aiManager;
+    public Lock lock;
+    public final String oauthToken;
+    public Map<String, List<Map<String, String>>> conversations;
+    public static final Logger logger = Logger.getLogger("Vyrtuous");
+    private static Helpers helpers;
+
+    public static void main(String[] args) {
+        try {
+            config = new Config();
+            helpers = new Helpers();
+            setupLogging(config);
+            initializeDatabase();
+
+//            DiscordOAuth discordOAuth = new DiscordOAuth(config);
+//            LinkedInOAuth linkedInOAuth = new LinkedInOAuth(config);
+//            PatreonOAuth patreonOAuth = new PatreonOAuth(config);
+//            TwitchOAuth twitchOAuth = new TwitchOAuth(config);
+
+            // Print authorization URLs
+//            System.out.println("Please authenticate Discord by visiting the following URL:");
+//            System.out.println(discordOAuth.getAuthorizationUrl());
+//            System.out.println("Please authenticate LinkedIn by visiting the following URL:");
+//            System.out.println(linkedInOAuth.getAuthorizationUrl());
+//            System.out.println("Please authenticate Patreon by visiting the following URL:");
+//            System.out.println(patreonOAuth.getAuthorizationUrl());
+//            System.out.println("Please authenticate Twitch by visiting the following URL:");
+//            System.out.println(twitchOAuth.getAuthorizationUrl());
+
+            // Create bot instances
+            DiscordBot discordBot = new DiscordBot(config, discordOAuth.getAccessToken(), dbPool);
+//            LinkedInBot linkedInBot = new LinkedInBot(config, linkedInOAuth.getAccessToken(), dataSource);
+//            TwitchBot twitchBot = new TwitchBot(config, twitchOAuth.getAccessToken(), dataSource);
+
+            // Start bots asynchronously
+            CompletableFuture<Void> discordTask = CompletableFuture.runAsync(() -> discordBot.start());
+//            CompletableFuture<Void> linkedInTask = CompletableFuture.runAsync(() -> linkedInBot.start());
+//            CompletableFuture<Void> twitchTask = CompletableFuture.runAsync(() -> twitchBot.start());
+
+            CompletableFuture<Void> allTasks = CompletableFuture.allOf(discordTask);//, linkedInTask, twitchTask);
+            allTasks.join(); // Wait for all to finish
+
+        } catch (Exception e) {
+            logger.severe("Error initializing the application: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void setupLogging(Config config) {
+        // Implement your logging setup based on the configuration
+    }
+
+    private static void initializeDatabase() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:postgresql://localhost:5432/lucy");
+        config.setUsername("postgres");
+        config.setPassword("");
+        config.setDriverClassName("org.postgresql.Driver");
+
+        dataSource = new HikariDataSource(config);
+
+        // Test the connection
+        try (Connection connection = dataSource.getConnection()) {
+            logger.info("Database connection established.");
+        } catch (SQLException e) {
+            logger.severe("Failed to connect to the database: " + e.getMessage());
+        }
+    }
+
+    public static HikariDataSource getDataSource() {
+        return dataSource;
+    }
+}
