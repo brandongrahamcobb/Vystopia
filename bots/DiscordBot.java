@@ -11,6 +11,8 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.entity.intent.Intent;
+
 import java.util.logging.Logger;
 import com.brandongcobb.vyrtuous.utils.include.Helpers;
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ public class DiscordBot implements MessageCreateListener {
 
     public DiscordBot(Helpers helpers, Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator, String apiKey) {
         this.config = config;
-        this.apiKey = config.getNestedConfigValue("api_keys", "Discord").getStringValue("api_key");
+        this.apiKey = apiKey;
         this.aiManager = aiManager;
         this.helpers = helpers;
         this.messageManager = messageManager;
@@ -48,12 +50,10 @@ public class DiscordBot implements MessageCreateListener {
     }
 
     private void initializeBot(String apiKey) {
-        this.api = new DiscordApiBuilder().setToken(apiKey).login().join();
+        this.api = new DiscordApiBuilder().setToken(apiKey).addIntents(Intent.MESSAGE_CONTENT).login().join();
 
-        // Register the message listener
         this.api.addMessageCreateListener(this);
 
-        // Load and register cogs
         loadCogs();
     }
 
@@ -61,7 +61,7 @@ public class DiscordBot implements MessageCreateListener {
         List<Cog> cogs = new ArrayList<>();
 //        cogs.add(new HybridCommands()); // Add your cogs here
 //        cogs.add(new AdministratorCommands()); // Add your cogs here
-        cogs.add(new EventListeners()); // Add your cogs here
+        cogs.add(new EventListeners(this)); // Add your cogs here
 //        cogs.add(new ScheduledTasks()); // Add your cogs here
 
         for (Cog cog : cogs) {

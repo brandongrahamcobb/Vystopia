@@ -50,6 +50,7 @@ public class ModerationManager {
                 return server; // Return the server wrapped in an Optional
             }
         }
+        return null;
     }
 
     public void handleModeration(Message message, String reasonStr) {

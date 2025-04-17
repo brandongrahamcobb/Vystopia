@@ -16,10 +16,10 @@ public class Helpers {
     // Paths
     public static final String PATH_TOML = Paths.get(DIR_HOME, "Vyrtuous", "pyproject.toml").toString();
     public static final String PATH_CONFIG = Paths.get(DIR_BASE, "vyrtuous", "Config.java").toString();
-    public static final String PATH_CONFIG_YAML = Paths.get(DIR_BASE, "vyrtuous", ".config", "config.yaml").toString();
-    public static final String PATH_LOG = Paths.get(DIR_BASE, "vyrtuous", ".log", "discord.log").toString();
+    public static final String PATH_CONFIG_YAML = Paths.get(DIR_HOME, ".config", "vyrtuous", "config.yaml").toString();
+    public static final String PATH_LOG = Paths.get(DIR_HOME, ".log", "vyrtuous", "discord.log").toString();
     public static final String PATH_MAIN = Paths.get(DIR_BASE, "vyrtuous", "Main.java").toString();
-    public static final String PATH_USERS = Paths.get(DIR_BASE, "vyrtuous", ".users", "users.yaml").toString();
+//    public static final String PATH_USERS = Paths.get(DIR_HOME, ".users", "vyrtuous". "users.yaml").toString();
 
     // Bots paths
     public static final String PATH_DISCORD_BOT = Paths.get(DIR_BASE, "vyrtuous", "bots", "DiscordBot.java").toString();

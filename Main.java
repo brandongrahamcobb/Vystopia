@@ -14,6 +14,8 @@ import com.brandongcobb.vyrtuous.utils.security.DiscordOAuth;
 //import com.brandongcobb.vyrtuous.Security.TwitchOAuth;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.javacord.api.DiscordApi;
+
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,6 +39,7 @@ public class Main {
     public static Lock lock;
     public static Map<String, List<Map<String, String>>> conversations;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
+    public static DiscordApi api;
 
     public Main() {
         try {
@@ -68,9 +71,7 @@ public class Main {
 //            System.out.println(twitchOAuth.getAuthorizationUrl());
 
             // Create bot instances
-            Map<String, Object> apiKeysConfig = (Map<String, Object>) config.getConfigValue("api_keys"); // Retrieve "api_keys"
-            Map<String, Object> discordApiKeys = (Map<String, Object>) apiKeysConfig.get("Discord"); // Retrieve "Discord"
-            DiscordBot discordBot = new DiscordBot(helpers, logger, config, dbPool, aiManager, lock, messageManager, predicator, (String) config.getNestedConfigValue("api_keys", "Discord").getStringValue("api_key"));
+            DiscordBot discordBot = new DiscordBot(helpers, logger, config, dbPool, aiManager, lock, messageManager, predicator, config.getNestedConfigValue("api_keys", "Discord").getStringValue("api_key"));
 //            LinkedInBot linkedInBot = new LinkedInBot(config, linkedInOAuth.getAccessToken(), dataSource);
 //            TwitchBot twitchBot = new TwitchBot(config, twitchOAuth.getAccessToken(), dataSource);
 

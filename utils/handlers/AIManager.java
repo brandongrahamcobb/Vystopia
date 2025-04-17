@@ -50,7 +50,7 @@ public class AIManager {
         this.config = config;
         this.helpers = helpers;
         this.conversations = new HashMap<>();
-        this.openaiApiKey = (String) ((Map<String, Object>) this.config.getNestedConfigValue("api_keys", "OpenAI")).get("api_key").toString();
+        this.openaiApiKey = this.config.getNestedConfigValue("api_keys", "OpenAI").getStringValue("api_key");
     }
 
     private Map<String, Object> loadConfig(String path) throws IOException {
@@ -81,6 +81,7 @@ public class AIManager {
                 HttpPost post = new HttpPost(apiUrl);
                 post.setHeader("Authorization", "Bearer " + openaiApiKey);
                 post.setHeader("Content-Type", "application/json");
+    
                 Map<String, Object> requestBody = new HashMap<>();
                 requestBody.put("add_completions_to_history", addCompletionToHistory);
                 requestBody.put("completions", n);
@@ -89,9 +90,19 @@ public class AIManager {
                 requestBody.put("model", model);
                 requestBody.put("stop", stop);
                 requestBody.put("store", store);
-                requestBody.put("top_p", top_p); // Note: Ensure variable name matches correctly
-                requestBody.put("messages", messages);
+                requestBody.put("top_p", top_p);
+                
+                // Create the messages array for the API request
+                List<Map<String, Object>> messagesList = new ArrayList<>();
+                for (MessageContent messageContent : messages) {
+                    Map<String, Object> messageMap = new HashMap<>();
+                    messageMap.put("role", messageContent.getType()); // Assuming getType() returns the role ("user" or "assistant")
+                    messageMap.put("content", messageContent.getText()); // Assuming getText() returns the message content
+                    messagesList.add(messageMap);
+                }
+                requestBody.put("messages", messagesList); // Add the constructed messages list to the request body
     
+                // If storing is enabled, add metadata
                 if (store) {
                     LocalDateTime now = LocalDateTime.now();
                     requestBody.put("metadata", new Object[]{
@@ -99,17 +110,7 @@ public class AIManager {
                     });
                 }
     
-                // Process each message in the messages list
-                for (MessageContent messageContent : messages) {
-                    String role = messageContent.getType(); // Assuming this is how you get the role
-                    String content = messageContent.getText(); // Assuming this is how you get the content
-                    conversations
-                            .computeIfAbsent(String.valueOf(customId), k -> new ArrayList<>())
-                            .add(Map.of("role", role, "content", content));
-                }
-
                 trimConversationHistory(model, String.valueOf(customId));
-    
                 // Convert the request body to JSON
                 ObjectMapper objectMapper = new ObjectMapper();
                 String jsonBody = objectMapper.writeValueAsString(requestBody);
@@ -192,15 +193,24 @@ public class AIManager {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, Map.class);
     
+        // Check if "choices" exists and is not null
+        if (!responseMap.containsKey("choices") || responseMap.get("choices") == null) {
+            throw new IllegalArgumentException("Response does not contain 'choices'. Response: " + jsonResponse);
+        }
+    
         // Get the choices list from the response
         List<Map<String, Object>> choices = (List<Map<String, Object>>) responseMap.get("choices");
-        
+    
+        if (choices.isEmpty()) {
+            throw new IllegalArgumentException("The 'choices' list is empty. Response: " + jsonResponse);
+        }
+    
         // Get the first choice
         Map<String, Object> firstChoice = choices.get(0);
-        
+    
         // Get the message map
         Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
-        
+    
         // Get the content from the message
         return (String) message.get("content"); // Cast to String
     }
@@ -233,17 +243,24 @@ public class AIManager {
     // Additional methods for handling status tracking, API request, etc., can be added here
     public void trimConversationHistory(String model, String customId) {
         int maxContextLength = helpers.OPENAI_CHAT_MODEL_CONTEXT_LIMITS.get(model);
-
+    
+        // Check if the conversations map contains the key
         List<Map<String, String>> history = conversations.get(customId);
+        if (history == null) {
+            // Handle the situation when there is no conversation history
+            System.out.println("No conversation history found for customId: " + customId);
+            return; // or handle it as appropriate
+        }
+    
         int totalTokens = history.stream()
             .mapToInt(msg -> msg.get("content").length())
             .sum();
-
+    
         while (totalTokens > maxContextLength && !history.isEmpty()) {
             Map<String, String> removedMessage = history.remove(0);
             totalTokens -= removedMessage.get("content").length();
         }
-
+    
         // Save trimmed history back
         conversations.put(customId, history);
     }

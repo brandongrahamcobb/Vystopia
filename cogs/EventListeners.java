@@ -32,6 +32,7 @@ import java.io.IOException;
 
 public class EventListeners implements Cog, MessageCreateListener {
 
+    private DiscordApi api;
     private DiscordBot bot;
     private AIManager aiManager;
     private MessageManager messageManager;
@@ -45,9 +46,9 @@ public class EventListeners implements Cog, MessageCreateListener {
     private int i;
     private boolean flagged;
 
-    @Override
-    public void register(DiscordApi api) {
+    public EventListeners (DiscordBot bot) {
         this.bot = bot;
+        this.api = this.bot.getApi();
         this.config = this.bot.config;
         this.dbPool = this.bot.dbPool;
         this.lock = this.bot.lock;
@@ -59,7 +60,11 @@ public class EventListeners implements Cog, MessageCreateListener {
             this.aiManager = new AIManager(this.config);
         } catch (IOException ioe) {}
         this.moderationManager = new ModerationManager(this.bot);
-        api.addMessageCreateListener(this);
+    }
+
+    @Override
+    public void register (DiscordApi apix) {
+        this.api.addMessageCreateListener(this);
     }
 
    @Override
