@@ -3,6 +3,8 @@ package com.brandongcobb.vyrtuous.utils.include;
 import java.util.Map;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Arrays;
 
 public class Helpers {
 
@@ -90,7 +92,7 @@ public class Helpers {
     public static final boolean OPENAI_CHAT_STORE = false;
     public static final boolean OPENAI_CHAT_STREAM = false;
     public static final String OPENAI_CHAT_SYS_INPUT = "You are Vyrtuous.";
-    public static final int OPENAI_CHAT_TOP_P = 1;
+    public static final float OPENAI_CHAT_TOP_P = 1.0f;
     public static final float OPENAI_CHAT_TEMPERATURE = 0.7f;
     public static final boolean OPENAI_CHAT_USE_HISTORY = true;
     public static final String OPENAI_CHAT_USER = "Brandon Graham Cobb";
@@ -132,7 +134,7 @@ public class Helpers {
         "o1-mini", 16384
     );
 
-    public static final String OPENAI_MODEL_MODERATION = "omni-moderation-latest";
+    public static final String OPENAI_MODERATION_MODEL = "omni-moderation-latest";
     public static final boolean OPENAI_MODERATION_IMAGE = true;
     
     public static final Map<String, String> SCRIPTURE_HEADERS = Map.of(

@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 public class Config {
 
+    private static Helpers helpers = new Helpers();
     public static Map<String, Object> config = new HashMap<>();
 
     static {
@@ -41,6 +42,14 @@ public class Config {
         } else {
             createDefaultConfig();
         }
+    }
+
+    public static Object getNestedConfigValue(String outerKey, String innerKey) {
+        Map<String, Object> outerMap = (Map<String, Object>) config.get(outerKey);
+        if (outerMap != null) {
+            return outerMap.get(innerKey);
+        }
+        return null; // Return null or handle accordingly if the outer key doesn't exist
     }
 
     public static Object getConfigValue(String key) {
@@ -114,23 +123,23 @@ public class Config {
     }
 
     private static void promptAdditionalConfig(boolean creating) {
-        config.put("discord_character_limit", promptForString("Discord character limit?", helpers.DISCORD_CHARACTER_LIMIT));
+        config.put("discord_character_limit", promptForString("Discord character limit?", String.valueOf(helpers.DISCORD_CHARACTER_LIMIT)));
         config.put("discord_command_prefix", promptForString("Discord command prefix?", helpers.DISCORD_COMMAND_PREFIX));
         config.put("discord_moderation_warning", promptForString("What should be sent to users if their message was moderated?", helpers.DISCORD_MODERATION_WARNING));
-        config.put("discord_owner_id", promptForString("Discord Owner ID?", helpers.DISCORD_OWNER_ID));
-        config.put("discord_release_mode", promptForString("Discord release mode?", helpers.DISCORD_RELEASE_MODE));
+        config.put("discord_owner_id", promptForString("Discord Owner ID?", String.valueOf(helpers.DISCORD_OWNER_ID)));
+        config.put("discord_release_mode", promptForString("Discord release mode?", String.valueOf(helpers.DISCORD_RELEASE_MODE)));
         config.put("discord_role_pass", promptForString("What is the role ID youd like unfiltered?", helpers.DISCORD_ROLE_PASS));
-        config.put("discord_testing_guild_id", promptForString("What is the Discord testing guild ID?", helpers.DISCORD_TESTING_GUILD_ID));
-        config.put("discord_testing_guild_ids", promptForString("Any extras?", helpers.DISCORD_TESTING_GUILD_ID));
+        config.put("discord_testing_guild_id", promptForString("What is the Discord testing guild ID?", String.valueOf(helpers.DISCORD_TESTING_GUILD_ID)));
+        config.put("discord_testing_guild_ids", promptForString("Any extras?", String.valueOf(helpers.DISCORD_TESTING_GUILD_ID)));
         config.put("discord_token", promptForString("What is the Discord token?", ""));
         config.put("logging_level", promptForString("What is the logging level (DEBUG, INFO, etc.)?", helpers.LOGGING_LEVEL));
-        config.put("openai_chat_add_completion_to_history", promptForString("Should completions be added to conversations?", helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY));
+        config.put("openai_chat_add_completion_to_history", promptForString("Should completions be added to conversations?", String.valueOf(helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY)));
         config.put("openai_chat_model", promptForString("Which chat model would you like to use for OpenAIs ChatGPT?", helpers.OPENAI_CHAT_MODEL));
         config.put("openai_chat_moderation_model", promptForString("Which OpenAI completions model would you like to use for moderation?", helpers.OPENAI_CHAT_MODERATION_MODEL));
-        config.put("openai_chat_completion", promptForString("Enable or disable OpenAI text completions (True/False)?", helpers.OPENAI_CHAT_COMPLETION));
-        config.put("openai_chat_moderation", promptForString("Enable or disable OpenAI text moderation (True/False)?", helpers.OPENAI_CHAT_MODERATION));
-        config.put("openai_chat_store", promptForString("Store OpenAI completions (True/False)?", helpers.OPENAI_CHAT_STORE));
-        config.put("openai_chat_stream", promptForString("Enable or disable OpenAI completions streaming (True/False)?", helpers.OPENAI_CHAT_STREAM));
+        config.put("openai_chat_completion", promptForString("Enable or disable OpenAI text completions (True/False)?", String.valueOf(helpers.OPENAI_CHAT_COMPLETION)));
+        config.put("openai_chat_moderation", promptForString("Enable or disable OpenAI text moderation (True/False)?", String.valueOf(helpers.OPENAI_CHAT_MODERATION)));
+        config.put("openai_chat_store", promptForString("Store OpenAI completions (True/False)?", String.valueOf(helpers.OPENAI_CHAT_STORE)));
+        config.put("openai_chat_stream", promptForString("Enable or disable OpenAI completions streaming (True/False)?", String.valueOf(helpers.OPENAI_CHAT_STREAM)));
         config.put("openai_chat_stop", promptForString("What might be the OpenAI stop criteria for completions?", helpers.OPENAI_CHAT_STOP));
 //        for (i = 0; i == OPENAI_CHAT_MODELS.length; i++) {
         boolean exists = Arrays.asList(OPENAI_CHAT_MODELS["deprecated"]);
@@ -140,11 +149,11 @@ public class Config {
         else {
             config.put("openai_chat_sys_input", promptForString("What is the OpenAI completions system input?", ""));
         }
-        config.put("openai_chat_temperature", promptForString("What is the OpenAI completions temperature (0.0 to 2.0)?", helpers.OPENAI_CHAT_TEMPERATURE));
-        config.put("openai_chat_top_p", promptForString("What should the top p be for OpenAI completions?", helpers.OPENAI_CHAT_TOP_P));
-        config.put("openai_chat_use_history", promptForString("Should OpenAI moderations use history?", helpers.OPENAI_CHAT_USE_HISTORY));
+        config.put("openai_chat_temperature", promptForString("What is the OpenAI completions temperature (0.0 to 2.0)?", String.valueOf(helpers.OPENAI_CHAT_TEMPERATURE)));
+        config.put("openai_chat_top_p", promptForString("What should the top p be for OpenAI completions?", String.valueOf(helpers.OPENAI_CHAT_TOP_P)));
+        config.put("openai_chat_use_history", promptForString("Should OpenAI moderations use history?", String.valueOf(helpers.OPENAI_CHAT_USE_HISTORY)));
         config.put("openai_chat_user", promptForString("What is your OpenAI username?", helpers.OPENAI_CHAT_USER));
-        config.put("openai_moderation_image", promptForString("Enable or disable OpenAI image moderation (True/False)?", helpers.OPENAI_MODERATION_IMAGE));
+        config.put("openai_moderation_image", promptForString("Enable or disable OpenAI image moderation (True/False)?", String.valueOf(helpers.OPENAI_MODERATION_IMAGE)));
         config.put("openai_moderation_model", promptForString("Which model do you want for OpenAI image moderation?", helpers.OPENAI_MODERATION_MODEL));
         config.put("openai_organization", promptForString("What is the OpenAI-Organization ID?", helpers.OPENAI_CHAT_HEADERS.getOrDefault("OpenAI-Organization", "")));
         config.put("openai_project", promptForString("What is the OpenAI-Project ID?", helpers.OPENAI_CHAT_HEADERS.getOrDefault("OpenAI-Project", "")));

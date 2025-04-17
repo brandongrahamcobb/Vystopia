@@ -6,8 +6,9 @@ import com.brandongcobb.vyrtuous.bots.DiscordBot;
 import com.brandongcobb.vyrtuous.Config;
 import com.brandongcobb.vyrtuous.utils.handlers.AIManager;
 import com.brandongcobb.vyrtuous.utils.handlers.MessageManager;
+import com.brandongcobb.vyrtuous.utils.handlers.Predicator;
 import com.brandongcobb.vyrtuous.utils.include.Helpers;
-//import com.brandongcobb.vyrtuous.Security.DiscordOAuth;
+import com.brandongcobb.vyrtuous.utils.security.DiscordOAuth;
 //import com.brandongcobb.vyrtuous.Security.LinkedInOAuth;
 //import com.brandongcobb.vyrtuous.Security.PatreonOAuth;
 //import com.brandongcobb.vyrtuous.Security.TwitchOAuth;
@@ -24,12 +25,15 @@ import java.util.concurrent.locks.Lock;
 
 public class Main {
 
-    public Config config;
-    public HikariDataSource dbPool;
-    public AIManager aiManager;
-    public Lock lock;
-    public final String oauthToken;
-    public Map<String, List<Map<String, String>>> conversations;
+    public static Config config;
+    private static DiscordOAuth discordOAuth;
+    public static HikariDataSource dbPool;
+    public static AIManager aiManager;
+    public static MessageManager messageManager;
+    public static Predicator predicator;
+    public static Lock lock;
+    public static final String oauthToken;
+    public static Map<String, List<Map<String, String>>> conversations;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
     private static Helpers helpers;
 
@@ -56,7 +60,9 @@ public class Main {
 //            System.out.println(twitchOAuth.getAuthorizationUrl());
 
             // Create bot instances
-            DiscordBot discordBot = new DiscordBot(config, discordOAuth.getAccessToken(), dbPool);
+            Object apiKeyObj = Config.getNestedConfigValue("api_keys", "Discord");
+            Map <String, Object> nestedConfig = (Map<String, Object>) apiKeyObj;
+            DiscordBot discordBot = new DiscordBot(logger, config, dbPool, aiManager, lock, messageManager, predicator, nestedConfig.get("api_key").toString());
 //            LinkedInBot linkedInBot = new LinkedInBot(config, linkedInOAuth.getAccessToken(), dataSource);
 //            TwitchBot twitchBot = new TwitchBot(config, twitchOAuth.getAccessToken(), dataSource);
 
@@ -79,13 +85,13 @@ public class Main {
     }
 
     private static void initializeDatabase() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:postgresql://localhost:5432/lucy");
-        config.setUsername("postgres");
-        config.setPassword("");
-        config.setDriverClassName("org.postgresql.Driver");
+        HikariConfig sqlConfig = new HikariConfig();
+        sqlConfig.setJdbcUrl("jdbc:postgresql://localhost:5432/lucy");
+        sqlConfig.setUsername("postgres");
+        sqlConfig.setPassword("");
+        sqlConfig.setDriverClassName("org.postgresql.Driver");
 
-        dataSource = new HikariDataSource(config);
+        HikariDataSource dataSource = new HikariDataSource(sqlConfig);
 
         // Test the connection
         try (Connection connection = dataSource.getConnection()) {

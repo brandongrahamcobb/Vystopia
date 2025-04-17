@@ -34,8 +34,8 @@ public class Predicator {
 
     public boolean isVeganUser(User user) {
         List<Long> serverIds = (List<Long>) config.getConfigValue("discord_testing_guild_ids");
-        for (Long serverId : guildIds) {
-            Server server = bot.getApi().getServerById(guildId).join();
+        for (Long serverId : serverIds) {
+            Server server = bot.getApi().getServerById(serverId).join();
             if (guild != null) {
                 // Assuming you have a method to check member roles
                 if (server.getRoleById(server.getRoles().stream().filter(role -> role.getName().equals("vegan")).findFirst().get().getId()).join().getUsers().contains(user)) {

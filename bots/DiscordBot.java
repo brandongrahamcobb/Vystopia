@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
-public class DiscordBot implements MessageCreateListener {
+public class DiscordBot {
 
     public static AIManager aiManager;
     public static final Config config;
@@ -27,9 +27,11 @@ public class DiscordBot implements MessageCreateListener {
     public static final Helpers helpers;
     public static final Lock lock;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
+    private static final String apiKey;
     public static Predicator predicator;
+    private static DiscordApi api;
 
-    public DiscordBot(Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator) {//, String oauthToken) {
+    public DiscordBot(Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator,  String apiKey) {//, String oauthToken) {
         this.config = config.getConfig();
         this.aiManager = aiManager;
         this.messageManager = messageManager;
@@ -40,17 +42,18 @@ public class DiscordBot implements MessageCreateListener {
 //        this.oauthToken = oauthToken;
 
         // Initialize the bot
-        initializeBot();
+        initializeBot(apiKey);
     }
 
-    private void initializeBot() {
-        String token = config.get("api_keys").get("Discord").get("api_key").toString(); // Adjust to your config structure
-        DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
+    private void initializeBot(String apiKey) {
+        String token = apiKey; // Adjust to your config structure
+        this.api = new DiscordApiBuilder().setToken(token).login().join();
 
         // Register the message listener
-        api.addMessageCreateListener(this);
+        this.api.addMessageCreateListener(this);
 
         // Load and register cogs
+        loadCogs(this.api);
     }
 
     private void loadCogs(DiscordApi api) {
@@ -61,8 +64,12 @@ public class DiscordBot implements MessageCreateListener {
 //        cogs.add(new ScheduledTasks()); // Add your cogs here
 
         for (Cog cog : cogs) {
-            cog.register(api);
+            cog.register(this.api);
         }
         // Load your cogs (modules) here if needed
+    }
+
+    public DiscordApi getApi() {
+        return this.api;
     }
 }

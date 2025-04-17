@@ -1,12 +1,18 @@
-package com.brandongcobb.vyrtuous;
+package com.brandongcobb.vyrtuous.utils.handlers;
 
 import com.brandongcobb.vyrtuous.bots.DiscordBot;
+import com.brandongcobb.vyrtuous.Config;
+import com.brandongcobb.vyrtuous.utils.handlers.AIManager;
+import com.brandongcobb.vyrtuous.utils.include.Helpers;
+import com.brandongcobb.vyrtuous.utils.handlers.MessageManager;
+import com.brandongcobb.vyrtuous.utils.handlers.Predicator;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.channel.PrivateChannel;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.concurrent.locks.Lock;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,11 +22,17 @@ import java.util.logging.Logger;
 
 public class ModerationManager {
 
-    private final HikariDataSource dbPool; // Assuming you set this up elsewhere
+    private DiscordBot bot;
+    private AIManager aiManager;
+    private MessageManager messageManager;
+    private final HikariDataSource dbPool;
+    private Lock lock;
+    private Predicator predicator;
     private final Config config;
-    private final Logger logger = Logger.getLogger(ModerationHandler.class.getName());
+//    privat static String oauthtoken;
+    private Helpers helpers;
 
-    public void ModerationHandler(DiscordBot bot) {
+    public ModerationManager(DiscordBot bot) {
         this.bot = bot;
         this.config = bot.config;
         this.dbPool = bot.dbPool;

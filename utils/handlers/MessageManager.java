@@ -114,6 +114,12 @@ public class MessageManager {
         return user.openPrivateChannel().thenCompose(channel -> sendMessage(channel, content, file, embed));
     }
 
+    public CompletableFuture<Message> sendMessage(Message message, String content) {
+        return message.getServerTextChannel()
+                .map(channel -> channel.sendMessage(content)) // Send message content only
+                .orElseThrow(() -> new IllegalArgumentException("Message is not in a server text channel."));
+    }
+
     public CompletableFuture<Void> sendMessage(Message message, String content, File file, EmbedBuilder embed) {
         return message.getChannel().sendMessage(content, file, embed);
     }

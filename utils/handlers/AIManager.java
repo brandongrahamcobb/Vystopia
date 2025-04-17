@@ -28,10 +28,24 @@ public class AIManager {
     private static Map<String, List<Map<String, String>>> conversations;
     private static String openaiApiKey;
     private static Helpers helpers = new Helpers();
+    private int n = helpers.OPENAI_CHAT_N;
+    private long customID;
+    private CompletableFuture inputArray;
+    private String model = helpers.OPENAI_CHAT_MODEL;
+    private int maxTokens = helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(model);
+    private String responseFormat = helpers.OPENAI_CHAT_RESPONSE_FORMAT;
+    private boolean stop = helpers.OPENAI_CHAT_STOP;
+    private boolean store = helpers.OPENAI_CHAT_STORE;
+    private boolean stream = helpers.OPENAI_CHAT_STREAM;
+    private String sysInput = helpers.OPENAI_CHAT_SYS_INPUT;
+    private float temperature = helpers.OPENAI_CHAT_TEMPERATURE;
+    private float topP = helper.OPENAI_CHAT_TOP_P;
+    private boolean addCompletionToHistory = helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY;
 
     public AIManager(Config config) throws IOException {
         // Load configuration
         this.config = config.getConfig();
+        this.helpers = this.config.helpers;
         this.conversations = new HashMap<>();
         this.openaiApiKey = (String) ((Map<String, Object>) this.config.get("api_keys")).get("OpenAI").get("api_key").toString();
     }
@@ -43,7 +57,7 @@ public class AIManager {
         }
     }
 
-    public CompletableFuture<String> getChatCompletion(int n, String customID, CompletableFuture inputArray, int maxTokens, String model, String responseFormat, boolean stop, boolean stream, String sysInput, float temperature, float top_p, boolean store, boolean addCompletionToHistory) throws IOException {
+    public CompletableFuture<String> getChatCompletion(int n, long customID, CompletableFuture inputArray, int maxTokens, String model, String responseFormat, boolean stop, boolean stream, String sysInput, float temperature, float top_p, boolean store, boolean addCompletionToHistory) throws IOException {
         return inputArray.thenApply(messages -> {
             String apiUrl = "https://api.openai.com/v1/chat/completions";
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
@@ -98,13 +112,13 @@ public class AIManager {
         });
     }
 
-    public String getChatCompletion(int n, long customID, CompletableFuture inputArray, int maxTokens, String model, String responseFormat, boolean stop, boolean stream, String sysInput, float temperature, float topP, boolean store, boolean addCompletionToHistory) throws IOException {
-        
-        return getChatCompletion(config.getConfigValue("openai_chat_completion"), customID, inputArray, config.getConfigValue("openai_chat_model"), OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getConfigValue("openai_chat_stop"), config.getConfigValue("openai_chat_stream"), config.getConfigValue("openai_chat_sys_input"), config.getConfigValue("openai_chat_temperature"), config.getConfigValue("openai_chat_top_p"), helpers.OPENAI_CHAT_USE_HISTORY, helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY);
+    public String getCompletion(long customID, CompletableFuture inputArray) throws IOException {
+
+        return getChatCompletion(config.getConfigValue("openai_chat_completion"), customID, inputArray, config.getConfigValue("openai_chat_model"), OPENAI_CHAT_RESPONSE_FORMAT, config.getConfigValue("openai_chat_stop"), config.getConfigValue("openai_chat_stream"), config.getConfigValue("openai_chat_sys_input"), config.getConfigValue("openai_chat_temperature"), config.getConfigValue("openai_chat_top_p"), helpers.OPENAI_CHAT_USE_HISTORY, helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY);
     }
 
-    public String getChatModerationCompletion(int n, long customID, CompletableFuture inputArray, int maxTokens, String model, String responseFormat, boolean stop, boolean stream, String sysInput, float temperature, float topP, boolean store, boolean addCompletionToHistory) throws IOException {
-        
+    public String getChatModerationCompletion(long customID, CompletableFuture inputArray) throws IOException {
+
         return getChatCompletion(config.getConfigValue("openai_chat_completion"), customID, inputArray, config.getConfigValue("openai_chat_model"), OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getConfigValue("openai_chat_stop"), config.getConfigValue("openai_chat_stream"), config.getConfigValue("openai_chat_sys_input"), config.getConfigValue("openai_chat_temperature"), config.getConfigValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
     }
 
