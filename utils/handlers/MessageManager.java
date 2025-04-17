@@ -106,7 +106,7 @@ public class MessageManager {
         for (MessageAttachment attachment : attachments) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 File file = new File(helpers.DIR_TEMP, attachment.getFileName());
-                try (InputStream in = new URL(attachment.getUrl()).openStream()) {
+                try (InputStream in = attachment.getUrl().openStream()) {
                     Files.copy(in, file.toPath()); // Download the file from the URL
                     String contentType = getContentTypeFromFileName(attachment.getFileName());
                     if (contentType.startsWith("image/")) {
@@ -162,8 +162,8 @@ public class MessageManager {
         return valid;
     }
 
-    public CompletableFuture<Void> sendDM(User user, String content, File file, EmbedBuilder embed) {
-        return user.openPrivateChannel().thenCompose(channel -> sendMessage(channel, content, file, embed));
+    public CompletableFuture<Message> sendDM(User user, String content) {
+        return user.openPrivateChannel().thenCompose(channel -> channel.sendMessage(content));
     }
 
     // Send message to a server text channel (using the Message object)
@@ -179,11 +179,11 @@ public class MessageManager {
                 .orElseThrow(() -> new IllegalArgumentException("Message is not in a server text channel."));
     }
 
-    public CompletableFuture<Void> sendDiscordMessage(Message message, String content, File file) {
+    public CompletableFuture<Message> sendDiscordMessage(Message message, String content, File file) {
         return message.getChannel().sendMessage(content, file);
     }
 
-    private CompletableFuture<Void> sendDiscordMessage(PrivateChannel channel, String content, File file) {
+    private CompletableFuture<Message> sendDiscordMessage(PrivateChannel channel, String content, File file) {
         return channel.sendMessage(content, file);
     }
 

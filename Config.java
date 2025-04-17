@@ -33,7 +33,7 @@ public class Config {
             try (InputStream inputStream = new FileInputStream(configFile)) {
                 Yaml yaml = new Yaml();
                 config = yaml.load(inputStream);
-                if (promptForYesNo("Do you want to change any settings? (yes/no): ")) {
+                if (promptForYesNo("Do you want to change any settings? (yes/no): ", true)) {
                     modifyApiKeys();
                     promptAdditionalConfig();
                     saveConfig();
@@ -56,6 +56,41 @@ public class Config {
 
     public static Object getConfigValue(String key) {
         return config.get(key);
+    }
+
+    public static String getStringValue(String key) {
+        Object value = getConfigValue(key);
+        if (value instanceof String) {
+            return (String) value;
+        }
+        return null; // or throw an exception if you expect a String
+    }
+
+    public static Integer getIntValue(String key) {
+        Object value = getConfigValue(key);
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return null; // or throw an exception if you expect an Integer
+    }
+
+    public static Float getFloatValue(String key) {
+        Object value = getConfigValue(key);
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+        return null; // or throw an exception if you expect a Float
+    }
+
+    public static Boolean getBooleanValue(String key) {
+        Object value = getConfigValue(key);
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        } else if (value instanceof String) {
+            // Handle string representations of boolean, e.g., "true", "false"
+            return Boolean.parseBoolean((String) value);
+        }
+        return null; // or throw an exception if you expect a Boolean
     }
 
     private static void createDefaultConfig() {
@@ -125,7 +160,7 @@ public class Config {
     }
 
     private static void promptAdditionalConfig(boolean creating) {
-        config.put("discord_character_limit", promptForInt("Discord character limit?", String.valueOf(helpers.DISCORD_CHARACTER_LIMIT), 4000));
+        config.put("discord_character_limit", promptForInt("Discord character limit?", helpers.DISCORD_CHARACTER_LIMIT, 4000));
         config.put("discord_command_prefix", promptForString("Discord command prefix?", helpers.DISCORD_COMMAND_PREFIX));
         config.put("discord_moderation_warning", promptForString("What should be sent to users if their message was moderated?", helpers.DISCORD_MODERATION_WARNING));
         config.put("discord_owner_id", promptForLong("Discord Owner ID?", helpers.DISCORD_OWNER_ID, 2000000000000000000L));
@@ -159,7 +194,7 @@ public class Config {
         config.put("openai_chat_temperature", promptForFloat("What is the OpenAI completions temperature (0.0 to 2.0)?", helpers.OPENAI_CHAT_TEMPERATURE, 2.0f));
         config.put("openai_chat_top_p", promptForFloat("What should the top p be for OpenAI completions?", helpers.OPENAI_CHAT_TOP_P, 1.0f));
         config.put("openai_chat_use_history", promptForYesNo("Should OpenAI moderations use history?", helpers.OPENAI_CHAT_USE_HISTORY));
-        config.put("openai_chat_user", promptForYesNo("What is your OpenAI username?", helpers.OPENAI_CHAT_USER));
+        config.put("openai_chat_user", promptForString("What is your OpenAI username?", helpers.OPENAI_CHAT_USER));
         config.put("openai_moderation_image", promptForYesNo("Enable or disable OpenAI image moderation (True/False)?", helpers.OPENAI_MODERATION_IMAGE));
         config.put("openai_moderation_model", promptForString("Which model do you want for OpenAI image moderation?", helpers.OPENAI_MODERATION_MODEL));
         config.put("openai_organization", promptForString("What is the OpenAI-Organization ID?", helpers.OPENAI_CHAT_HEADERS.getOrDefault("OpenAI-Organization", "")));

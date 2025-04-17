@@ -30,10 +30,10 @@ public class AIManager {
     private static Helpers helpers = new Helpers();
     private int n = helpers.OPENAI_CHAT_N;
     private long customID;
-    private CompletableFuture inputArray;
+    private CompletableFuture<List<Map<String, Object>>> inputArray;
     private String model = helpers.OPENAI_CHAT_MODEL;
     private int maxTokens = helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(model);
-    private String responseFormat = helpers.OPENAI_CHAT_RESPONSE_FORMAT;
+    private Map<String, Object> responseFormat = helpers.OPENAI_CHAT_RESPONSE_FORMAT;
     private String stop = helpers.OPENAI_CHAT_STOP;
     private boolean store = helpers.OPENAI_CHAT_STORE;
     private boolean stream = helpers.OPENAI_CHAT_STREAM;
@@ -65,8 +65,8 @@ public class AIManager {
             CompletableFuture<List<Map<String, Object>>> inputArray,
             int maxTokens,
             String model,
-            String responseFormat,
-            boolean stop,
+            Map<String, Object> responseFormat,
+            String stop,
             boolean stream,
             String sysInput,
             float temperature,
@@ -127,20 +127,31 @@ public class AIManager {
         });
     }
 
-    public String getCompletion(long customId, CompletableFuture inputArray) throws IOException {
+    public CompletableFuture<String> getCompletion(long customId, CompletableFuture<List<Map<String, Object>>> inputArray) throws IOException {
 
-        return getChatCompletion(config.getConfigValue("openai_chat_completion"), customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getConfigValue("openai_chat_model")), config.getConfigValue("openai_chat_model"), helpers.OPENAI_CHAT_RESPONSE_FORMAT, config.getConfigValue("openai_chat_stop"), config.getConfigValue("openai_chat_stream"), config.getConfigValue("openai_chat_sys_input"), config.getConfigValue("openai_chat_temperature"), config.getConfigValue("openai_chat_top_p"), helpers.OPENAI_CHAT_USE_HISTORY, helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY);
+        return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_USE_HISTORY, helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY);
     }
 
-    public String getChatModerationCompletion(long customId, CompletableFuture inputArray) throws IOException {
+    public CompletableFuture<String> getChatModerationCompletion(long customId, CompletableFuture<List<Map<String, Object>>> inputArray) throws IOException {
 
-        return getChatCompletion(config.getConfigValue("openai_chat_completion"), customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getConfigValue("openai_chat_model")), config.getConfigValue("openai_chat_model"), helpers.OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getConfigValue("openai_chat_stop"), config.getConfigValue("openai_chat_stream"), config.getConfigValue("openai_chat_sys_input"), config.getConfigValue("openai_chat_temperature"), config.getConfigValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
+        return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_MODERATION_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
     }
 
     private String extractCompletion(String jsonResponse) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, Map.class);
-        return ((Map<String, String>) ((List<Map<String, Object>>) responseMap.get("choices")).get(0)).get("message").get("content");
+    
+        // Get the choices list from the response
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) responseMap.get("choices");
+        
+        // Get the first choice
+        Map<String, Object> firstChoice = choices.get(0);
+        
+        // Get the message map
+        Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
+        
+        // Get the content from the message
+        return (String) message.get("content"); // Cast to String
     }
 
     public static List<String> splitLongResponse(String response, int limit) {
@@ -170,16 +181,16 @@ public class AIManager {
     }
     // Additional methods for handling status tracking, API request, etc., can be added here
     public void trimConversationHistory(String model, String customId) {
-        int maxContextLength = OPENAI_MODEL_CONTEXT_LIMITS.get(model, 4096);
+        int maxContextLength = helpers.OPENAI_CHAT_MODEL_CONTEXT_LIMITS.get(model);
 
-        List<Map<String, String>> history = conversations.get(customId, new ArrayList<>());
+        List<Map<String, String>> history = conversations.get(customId);
         int totalTokens = history.stream()
-            .mapToInt(msg -> msg.get("content", "").length())
+            .mapToInt(msg -> msg.get("content").length())
             .sum();
 
         while (totalTokens > maxContextLength && !history.isEmpty()) {
             Map<String, String> removedMessage = history.remove(0);
-            totalTokens -= removedMessage.get("content", "").length();
+            totalTokens -= removedMessage.get("content").length();
         }
 
         // Save trimmed history back

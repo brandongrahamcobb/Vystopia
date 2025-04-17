@@ -86,7 +86,7 @@ public class Helpers {
     public static final String OPENAI_CHAT_MODEL = "gpt-4o-mini";
     public static final boolean OPENAI_CHAT_MODERATION_USE_HISTORY = false;
     public static final boolean OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY = false;
-    public static final String OPENAI_CHAT_RESPONSE_FORMAT = "";
+    public static final Map<String, Object> OPENAI_CHAT_RESPONSE_FORMAT = new HashMap<>();
     public static final String OPENAI_CHAT_STOP = "";
     public static final boolean OPENAI_CHAT_STORE = false;
     public static final boolean OPENAI_CHAT_STREAM = false;
