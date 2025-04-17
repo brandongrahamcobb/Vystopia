@@ -68,6 +68,7 @@ public class Predicator {
                 return server; // Return the server wrapped in an Optional
             }
         }
+        return null;
     }
     public boolean isReleaseMode(ServerTextChannel channel, User user) {
         return user.getId() == 154749533429956608L || // Your developer ID

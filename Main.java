@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import java.io.IOException;
 
 public class Main {
 
@@ -29,17 +30,23 @@ public class Main {
     public static Config config;
     private static DiscordOAuth discordOAuth;
     public static HikariDataSource dbPool;
-    public static AIManager aiManager = new AIManager(config);
+    public static AIManager aiManager;
+    public static Predicator predicator;
     private static Helpers helpers;
     public static MessageManager messageManager = new MessageManager(config, dbPool, helpers);
-    public static Predicator predicator = new Predicator(bot);
     public static Lock lock;
-    public static final String oauthToken;
     public static Map<String, List<Map<String, String>>> conversations;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
 
+    public Main() {
+        try {
+            aiManager = new AIManager(config);
+        } catch (IOException ioe) {}
+    }
+
     public static void main(String[] args) {
         try {
+            new Main();
             config = new Config();
             helpers = new Helpers();
             setupLogging(config);
@@ -63,7 +70,7 @@ public class Main {
             // Create bot instances
             Map<String, Object> apiKeysConfig = (Map<String, Object>) config.getConfigValue("api_keys"); // Retrieve "api_keys"
             Map<String, Object> discordApiKeys = (Map<String, Object>) apiKeysConfig.get("Discord"); // Retrieve "Discord"
-            DiscordBot discordBot = new DiscordBot(logger, config, dbPool, aiManager, lock, messageManager, predicator, (String) discordApiKeys.get("api_key"));
+            DiscordBot discordBot = new DiscordBot(helpers, logger, config, dbPool, aiManager, lock, messageManager, predicator, (String) config.getNestedConfigValue("api_keys", "Discord").getStringValue("api_key"));
 //            LinkedInBot linkedInBot = new LinkedInBot(config, linkedInOAuth.getAccessToken(), dataSource);
 //            TwitchBot twitchBot = new TwitchBot(config, twitchOAuth.getAccessToken(), dataSource);
 

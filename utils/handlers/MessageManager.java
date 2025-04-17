@@ -2,8 +2,8 @@ package com.brandongcobb.vyrtuous.utils.handlers;
 
 import com.brandongcobb.vyrtuous.bots.DiscordBot;
 import com.brandongcobb.vyrtuous.Config;
+import com.brandongcobb.vyrtuous.utils.handlers.MessageContent;
 import com.brandongcobb.vyrtuous.utils.handlers.AIManager;
-import com.brandongcobb.vyrtuous.utils.handlers.MessageManager;
 import com.brandongcobb.vyrtuous.utils.handlers.Predicator;
 import com.brandongcobb.vyrtuous.utils.include.Helpers;
 import org.javacord.api.entity.message.Message;
@@ -29,7 +29,6 @@ public class MessageManager {
 
     private DiscordBot bot;
     private AIManager aiManager;
-    private MessageManager messageManager;
     private final HikariDataSource dbPool;
     private Lock lock;
     private Predicator predicator;
@@ -42,43 +41,6 @@ public class MessageManager {
         this.config = config;
         this.dbPool = dbPool;
         this.helpers = helpers;
-    }
-
-    public static class MessageContent {
-        private final String type;
-        private final String text;
-        private final String imageData; // Only for images
-        private final String contentType; // Content type for attachments
-
-        public MessageContent(String type, String content) {
-            this.type = type;
-            this.text = content;
-            this.imageData = null;
-            this.contentType = null;
-        }
-
-        public MessageContent(String type, String imageData, String contentType) {
-            this.type = type;
-            this.text = null;
-            this.imageData = imageData;
-            this.contentType = contentType;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public String getImageData() {
-            return imageData;
-        }
-
-        public String getContentType() {
-            return contentType;
-        }
     }
 
     public CompletableFuture<List<MessageContent>> processArray(String content, List<MessageAttachment> attachments) {

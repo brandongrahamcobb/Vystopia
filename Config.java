@@ -46,10 +46,13 @@ public class Config {
         }
     }
 
-    public static Object getNestedConfigValue(String outerKey, String innerKey) {
+    public static ConfigSection getNestedConfigValue(String outerKey, String innerKey) {
         Map<String, Object> outerMap = (Map<String, Object>) config.get(outerKey);
         if (outerMap != null) {
-            return outerMap.get(innerKey);
+            Object innerValue = outerMap.get(innerKey);
+            if (innerValue instanceof Map) {
+                return new ConfigSection((Map<String, Object>) innerValue);
+            }
         }
         return null; // Return null or handle accordingly if the outer key doesn't exist
     }

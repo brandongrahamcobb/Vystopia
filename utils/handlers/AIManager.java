@@ -1,6 +1,7 @@
 package com.brandongcobb.vyrtuous.utils.handlers;
 
 import com.brandongcobb.vyrtuous.Config;
+import com.brandongcobb.vyrtuous.utils.handlers.MessageContent;
 import com.brandongcobb.vyrtuous.utils.include.Helpers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
@@ -62,7 +63,7 @@ public class AIManager {
     public CompletableFuture<String> getChatCompletion(
             int n,
             long customId,
-            CompletableFuture<List<Map<String, Object>>> inputArray,
+            CompletableFuture<List<MessageContent>> inputArray,
             int maxTokens,
             String model,
             Map<String, Object> responseFormat,
@@ -99,14 +100,14 @@ public class AIManager {
                 }
     
                 // Process each message in the messages list
-                for (Map<String, Object> message : messages) {
-                    String role = (String) message.get("role");
-                    String content = (String) message.get("content");
+                for (MessageContent messageContent : messages) {
+                    String role = messageContent.getType(); // Assuming this is how you get the role
+                    String content = messageContent.getText(); // Assuming this is how you get the content
                     conversations
                             .computeIfAbsent(String.valueOf(customId), k -> new ArrayList<>())
                             .add(Map.of("role", role, "content", content));
                 }
-    
+
                 trimConversationHistory(model, String.valueOf(customId));
     
                 // Convert the request body to JSON
@@ -127,14 +128,64 @@ public class AIManager {
         });
     }
 
-    public CompletableFuture<String> getCompletion(long customId, CompletableFuture<List<Map<String, Object>>> inputArray) throws IOException {
-
-        return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_USE_HISTORY, helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY);
+   // Convert List<MessageContent> to List<Map<String, Object>>
+    private List<Map<String, Object>> convertMessageContentToMap(List<MessageContent> messages) {
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (MessageContent msgContent : messages) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("role", msgContent.getType()); // Assuming getType() returns the role
+            map.put("content", msgContent.getText()); // Assuming getText() returns the content
+            mapList.add(map);
+        }
+        return mapList;
     }
 
-    public CompletableFuture<String> getChatModerationCompletion(long customId, CompletableFuture<List<Map<String, Object>>> inputArray) throws IOException {
+    public CompletableFuture<String> getCompletion(long customId, CompletableFuture<List<MessageContent>> inputArray) {
+//        return inputArray.thenApply(messages -> {
+//            List<Map<String, Object>> mapList = new ArrayList<>();
+  //          for (MessageContent msgContent : messages) {
+    //            Map<String, Object> map = new HashMap<>();
+      //          map.put("role", msgContent.getType()); // Assuming getType() returns the role
+        //        map.put("content", msgContent.getText()); // Assuming getText() returns the content
+          //      mapList.add(map);
+  //          return messages;
+    //    }).thenCompose(messages -> {
+      //      // Use the correct types and ensure you call the right CompletableFuture
+        try {
+            return getChatCompletion(
+                helpers.OPENAI_CHAT_N,
+                customId,
+                inputArray,
+                helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")),
+                config.getStringValue("openai_chat_model"),
+                helpers.OPENAI_CHAT_RESPONSE_FORMAT,
+                config.getStringValue("openai_chat_stop"), // Handle stop as boolean
+                config.getBooleanValue("openai_chat_stream"), // Handle stream as boolean
+                helpers.OPENAI_CHAT_SYS_INPUT,
+                config.getFloatValue("openai_chat_temperature"),
+                config.getFloatValue("openai_chat_top_p"),
+                helpers.OPENAI_CHAT_USE_HISTORY,
+                helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY
+            );
+        } catch (IOException ioe) {}
+        return null;
+    }
 
-        return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_MODERATION_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
+    public CompletableFuture<String> getChatModerationCompletion(long customId, CompletableFuture<List<MessageContent>> inputArray) throws IOException {
+        return inputArray.thenApply(messages -> {
+            //List<Map<String, Object>> mapList = new ArrayList<>();
+            //for (MessageContent msgContent : messages) {
+              //   Map<String, Object> map = new HashMap<>();
+                //map.put("role", msgContent.getType()); // or whatever you use for the role
+               // map.put("content", msgContent.getText()); // assuming MessageContent has a method getText()
+                //mapList.add(map);
+                return messages;
+        }).thenCompose(messages -> {
+            try {
+                return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_MODERATION_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
+            } catch (IOException ioe) {}
+            return null;
+        });
     }
 
     private String extractCompletion(String jsonResponse) throws IOException {

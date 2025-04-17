@@ -21,27 +21,27 @@ import java.util.concurrent.locks.Lock;
 public class DiscordBot implements MessageCreateListener {
 
     public static AIManager aiManager;
-    public final Config config;
+    public Config config;
     public static Map<String, List<Map<String, String>>> completions;
-    public final HikariDataSource dbPool;
-    //private final String oauthToken;
-    public static final Helpers helpers;
+    public HikariDataSource dbPool;
+    public Helpers helpers;
     public Lock lock;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
-    private static final String apiKey;
+    private String apiKey;
     public static MessageManager messageManager;
     public static Predicator predicator;
     private static DiscordApi api;
 
-    public DiscordBot(Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator, String apiKey) {//, String oauthToken) {
+    public DiscordBot(Helpers helpers, Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator, String apiKey) {
         this.config = config;
+        this.apiKey = config.getNestedConfigValue("api_keys", "Discord").getStringValue("api_key");
         this.aiManager = aiManager;
+        this.helpers = helpers;
         this.messageManager = messageManager;
         this.dbPool = dbPool;
         this.completions = completions;
         this.lock = lock;
         this.predicator = predicator;
-//        this.oauthToken = oauthToken;
 
         // Initialize the bot
         initializeBot(apiKey);
@@ -72,5 +72,14 @@ public class DiscordBot implements MessageCreateListener {
 
     public DiscordApi getApi() {
         return this.api;
+    }
+
+    @Override
+    public void onMessageCreate(MessageCreateEvent event) {
+        // Handle the incoming message event
+    }
+
+    public void start() {
+        logger.info("Discord bot started!");
     }
 }

@@ -2,10 +2,12 @@ package com.brandongcobb.vyrtuous.cogs;
 
 import com.brandongcobb.vyrtuous.bots.DiscordBot;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import com.brandongcobb.vyrtuous.utils.include.Helpers;
 import com.brandongcobb.vyrtuous.Config;
+import com.brandongcobb.vyrtuous.utils.handlers.MessageContent;
 import com.brandongcobb.vyrtuous.utils.handlers.MessageManager;
 import com.brandongcobb.vyrtuous.utils.handlers.ModerationManager;
 import com.brandongcobb.vyrtuous.utils.handlers.AIManager;
@@ -41,6 +43,7 @@ public class EventListeners implements Cog, MessageCreateListener {
 //    privat static String oauthtoken;
     private Helpers helpers;
     private int i;
+    private boolean flagged;
 
     @Override
     public void register(DiscordApi api) {
@@ -59,57 +62,83 @@ public class EventListeners implements Cog, MessageCreateListener {
         api.addMessageCreateListener(this);
     }
 
-    @Override
-    public void onMessageCreate(MessageCreateEvent event) {
-        Message message = event.getMessage();
-        List<MessageAttachment> attachments = message.getAttachments();
-        String content = event.getMessageContent();
-        CompletableFuture inputArray = messageManager.processArray(content = content, attachments = attachments);
-        User sender = message.getAuthor().asUser().orElse(null);
-        long senderId = sender.getId();
-        Boolean moderation = (Boolean) config.getConfigValue("openai_chat_moderation");
-        if (moderation && predicator.isDeveloper(sender)) {
-            List<Boolean> overall = new ArrayList<>();
-            List<String> reasons = new ArrayList<>();
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                String moderationResponse = aiManager.getChatModerationCompletion(sender.getId(), inputArray) ;
-                Map<String, Object> fullResponse = mapper.readValue(moderationResponse, Map.class);
-                List<Map<String,Object>> results = (List<Map<String, Object>>) fullResponse.getOrDefault("results", new ArrayList<>());
-                Map<String, Object> result = results.get(0);
-                boolean flagged = (boolean) result.getOrDefault("flagged", false);
-                List<Map<String, Boolean>> categories = (List<Map<String, Boolean>>) result.getOrDefault("categories", new ArrayList<>());
-                for (Map<String, Boolean> categoryMap : categories) {
-                    for (Map.Entry<String, Boolean> entry : categoryMap.entrySet()) {
-                        if (Boolean.TRUE.equals(entry.getValue())) {
-                            String category = entry.getKey()
-                                .replace("/", " → ")
-                                .replace("-", " ");
-                            category = capitalize(category);
-                            reasons.add(category);
-                        }
-                    }
-                }
-                overall.add(flagged);
-                for (i = 0; i == reasons.size(); i++) {
-                    moderationManager.handleModeration(message, reasons.get(i));
-                }
-                boolean hasTrue = overall.stream().anyMatch(Boolean::booleanValue);
-                if (hasTrue) {
-                    if ((boolean) config.getConfigValue("openai_chat_completion") && message.getMentionedUsers().contains(event.getApi().getYourself())) {
-                        String chatResponse = aiManager.getCompletion(senderId, inputArray);
-                        if (chatResponse.length() > 2000) {
-                            List<String> responses = aiManager.splitLongResponse(chatResponse, 1950);
-                            String[] responsesArray = responses.toArray(new String[0]);
-                            for (i = 0; i == responsesArray.length; i++) {
-                                messageManager.sendDiscordMessage(message, responsesArray[0]);
-                            }
-                        }
-                    }
-                }
-            } catch (IOException ioe) {}
-        }
-    }
+   @Override
+   public void onMessageCreate(MessageCreateEvent event) {
+       Message message = event.getMessage();
+       List<MessageAttachment> attachments = message.getAttachments();
+       String content = event.getMessageContent();
+       CompletableFuture<List<MessageContent>> inputArray = messageManager.processArray(content, attachments);
+       User sender = message.getAuthor().asUser().orElse(null);
+       long senderId = sender.getId();
+       boolean moderation = config.getBooleanValue("openai_chat_moderation");
+   
+       if (moderation && predicator.isDeveloper(sender)) {
+           List<Boolean> overall = new ArrayList<>();
+           List<String> reasons = new ArrayList<>();
+           ObjectMapper mapper = new ObjectMapper();
+   
+           try {
+               CompletableFuture<String> moderationResponse = aiManager.getChatModerationCompletion(sender.getId(), inputArray);
+               moderationResponse.thenAccept(response -> {
+                   try {
+                       List<Map<String, Object>> fullResponse = convertStringToList(response);
+                       List<Map<String, Object>> results = (List<Map<String, Object>>) fullResponse.get(0).get("results");
+                       
+                       if (results != null && !results.isEmpty()) {
+                           Map<String, Object> result = results.get(0);
+                           flagged = (boolean) result.get("flagged");
+                           List<Map<String, Boolean>> categories = (List<Map<String, Boolean>>) result.get("Categories");
+                           for (Map<String, Boolean> categoryMap : categories) {
+                               for (Map.Entry<String, Boolean> entry : categoryMap.entrySet()) {
+                                   if (Boolean.TRUE.equals(entry.getValue())) {
+                                       String category = entry.getKey()
+                                          .replace("/", " → ")
+                                          .replace("-", " ");
+                                       category = capitalize(category);
+                                       reasons.add(category);
+                                   }
+                               }
+                           }
+                       }
+                   } catch (IOException e) {
+                       e.printStackTrace(); // Log the exception or handle it accordingly
+                   }
+               }).exceptionally(e -> {
+                   e.printStackTrace(); // Handle any exception that occurs in the CompletableFuture
+                   return null;
+               });
+   
+               overall.add(flagged);
+               for (int i = 0; i < reasons.size(); i++) { // Use < instead of ==
+                   moderationManager.handleModeration(message, reasons.get(i));
+               }
+               boolean hasTrue = overall.stream().anyMatch(Boolean::booleanValue);
+               if (hasTrue) {
+                   if (Boolean.parseBoolean(config.getConfigValue("openai_chat_completion").toString()) && message.getMentionedUsers().contains(event.getApi().getYourself())) {
+                       CompletableFuture<String> chatResponse = aiManager.getCompletion(senderId, inputArray);
+                       chatResponse.thenAccept(response -> {
+                           if (response.length() > 2000) {
+                               List<String> responses = aiManager.splitLongResponse(response, 1950);
+                               String[] responsesArray = responses.toArray(new String[0]);
+                               for (String resp : responsesArray) {
+                                   messageManager.sendDiscordMessage(message, resp);
+                               }
+                           } else {
+                               messageManager.sendDiscordMessage(message, response);
+                           }
+                       });
+                   }
+               }
+           } catch (IOException e) {
+               e.printStackTrace(); // Handle exception appropriately
+           }
+       }
+   }
+
+   public static List<Map<String, Object>> convertStringToList(String jsonString) throws IOException {
+       ObjectMapper objectMapper = new ObjectMapper();
+       return objectMapper.readValue(jsonString, new TypeReference<List<Map<String, Object>>>() {});
+   }
 
     private static String capitalize(String input) {
         if (input == null || input.isEmpty()) return input;
