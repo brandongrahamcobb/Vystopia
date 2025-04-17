@@ -19,6 +19,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.Set;
 
 public class ModerationManager {
 
@@ -30,25 +33,35 @@ public class ModerationManager {
     private Predicator predicator;
     private final Config config;
 //    privat static String oauthtoken;
+    private Logger logger;
     private Helpers helpers;
 
     public ModerationManager(DiscordBot bot) {
         this.bot = bot;
         this.config = bot.config;
         this.dbPool = bot.dbPool;
+        this.logger = bot.logger;
+    }
+
+    public Server getServerById(long serverId) {
+        Set<Server> servers = bot.getApi().getServers(); // Get all servers
+        for (Server server : servers) {
+            if (server.getId() == serverId) {
+                return server; // Return the server wrapped in an Optional
+            }
+        }
     }
 
     public void handleModeration(Message message, String reasonStr) {
         Server server = message.getServer().orElse(null);
         User author = message.getAuthor().asUser().orElse(null);
 
-        if (guild == null || author == null) {
+        if (server == null || author == null) {
             return; // Invalid message context
         }
 
         // Check if the user has the unfiltered role
-        User user = guild.getUserById(author.getId()).join();
-        if (user.getRoles().stream().anyMatch(role -> role.getName().equals(config.getConfig().get("discord_role_pass")))) {
+        if (author.getRoles(server).stream().anyMatch(role -> role.getName().equals(config.getConfigValue("discord_role_pass")))) {
             return; // User is exempt from moderation
         }
 
@@ -87,17 +100,18 @@ public class ModerationManager {
             message.delete();
 
             // Send moderation warnings/messages
-            String moderationWarning = (String) config.getConfig().get("discord_moderation_warning");
+            String moderationWarning = (String) config.getConfigValue("discord_moderation_warning");
             if (flaggedCount == 1) {
-                sendMessage(author, moderationWarning + ". Your message was flagged for: " + reasonStr);
+                messageManager.sendDiscordMessage(message, moderationWarning + ". Your message was flagged for: " + reasonStr);
             } else if (flaggedCount >= 2 && flaggedCount <= 4) {
                 if (flaggedCount == 4) {
-                    sendMessage(author, moderationWarning + ". Your message was flagged for: " + reasonStr);
+                    messageManager.sendDiscordMessage(message, moderationWarning + ". Your message was flagged for: " + reasonStr);
                 }
             } else if (flaggedCount >= 5) {
-                sendMessage(author, moderationWarning + ". Your message was flagged for: " + reasonStr);
-                sendMessage(author, "You have been timed out for 5 minutes due to repeated violations.");
-                User.timeout(300); // Timeout for 5 minutes (300 seconds)
+                messageManager.sendDiscordMessage(message, moderationWarning + ". Your message was flagged for: " + reasonStr);
+                messageManager.sendDiscordMessage(message, "You have been timed out for 5 minutes due to repeated violations.");
+                
+                author.timeout(server, Duration.ofSeconds(300), reasonStr); // Timeout for 5 minutes (300 seconds)
 
                 // Reset the flagged count
                 PreparedStatement resetStatement = connection.prepareStatement(

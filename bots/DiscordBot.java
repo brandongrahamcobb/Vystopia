@@ -1,5 +1,6 @@
 package com.brandongcobb.vyrtuous.bots;
 
+import com.brandongcobb.vyrtuous.cogs.EventListeners;
 import com.brandongcobb.vyrtuous.cogs.Cog;
 import com.brandongcobb.vyrtuous.Config;
 import com.brandongcobb.vyrtuous.utils.handlers.AIManager;
@@ -17,22 +18,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
-public class DiscordBot {
+public class DiscordBot implements MessageCreateListener {
 
     public static AIManager aiManager;
-    public static final Config config;
-    public static Map<String, List<Map<String, String>>> conversations;
-    public static final HikariDataSource dbPool;
+    public final Config config;
+    public static Map<String, List<Map<String, String>>> completions;
+    public final HikariDataSource dbPool;
     //private final String oauthToken;
     public static final Helpers helpers;
-    public static final Lock lock;
+    public Lock lock;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
     private static final String apiKey;
+    public static MessageManager messageManager;
     public static Predicator predicator;
     private static DiscordApi api;
 
-    public DiscordBot(Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator,  String apiKey) {//, String oauthToken) {
-        this.config = config.getConfig();
+    public DiscordBot(Logger logger, Config config, HikariDataSource dbPool, AIManager aiManager, Lock lock, MessageManager messageManager, Predicator predicator, String apiKey) {//, String oauthToken) {
+        this.config = config;
         this.aiManager = aiManager;
         this.messageManager = messageManager;
         this.dbPool = dbPool;
@@ -46,17 +48,16 @@ public class DiscordBot {
     }
 
     private void initializeBot(String apiKey) {
-        String token = apiKey; // Adjust to your config structure
-        this.api = new DiscordApiBuilder().setToken(token).login().join();
+        this.api = new DiscordApiBuilder().setToken(apiKey).login().join();
 
         // Register the message listener
         this.api.addMessageCreateListener(this);
 
         // Load and register cogs
-        loadCogs(this.api);
+        loadCogs();
     }
 
-    private void loadCogs(DiscordApi api) {
+    private void loadCogs() {
         List<Cog> cogs = new ArrayList<>();
 //        cogs.add(new HybridCommands()); // Add your cogs here
 //        cogs.add(new AdministratorCommands()); // Add your cogs here

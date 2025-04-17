@@ -60,7 +60,7 @@ public class Helpers {
     public static final long DISCORD_ROLE_PASS = 1308689505158565918L; // Example role ID
     public static final long DISCORD_TESTING_GUILD_ID = 1300517536001036348L; // Example guild ID
     public static final String LOGGING_LEVEL = "INFO";
-    public static final String OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY = true;
+    public static final boolean OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY = true;
     public static final Map<String, Object> OPENAI_CHAT_COLORIZE_RESPONSE_FORMAT = createColorizeSchema();
     public static final boolean OPENAI_CHAT_COMPLETION = true;
     public static final Map<String, String> OPENAI_CHAT_HEADERS = Map.of(
@@ -69,11 +69,12 @@ public class Helpers {
         "User-Agent", "brandongrahamcobb@icloud.com",
         "OpenAI-Project", "proj_u5htBCWX0LSHxkw45po1Vfz9"
     );
+    public static final int OPENAI_CHAT_N = 1;
     public static final Map<String, List<String>> OPENAI_CHAT_MODELS = Map.of(
         "current", List.of("chatgpt-4o-mini-latest", "o1-preview", "o1-mini"),
         "deprecated", List.of("gpt-3.5-turbo", "gpt-4", "gpt-4-32k", "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "chatgpt-4o-latest")
     );
-
+    public static final boolean OPENAI_CHAT_MODERATION = true;
     public static final String OPENAI_CHAT_MODERATION_MODEL = "gpt-4o-mini";
     public static final Map<String, Object> OPENAI_CHAT_MODERATION_RESPONSE_FORMAT = createModerationSchema();
     public static final String OPENAI_CHAT_MODERATION_STOP = "";
@@ -82,12 +83,10 @@ public class Helpers {
     public static final String OPENAI_CHAT_MODERATION_SYS_INPUT = "You are a JSON moderation assistant";
     public static final float OPENAI_CHAT_MODERATION_TEMPERATURE = 1.0f;
     public static final float OPENAI_CHAT_MODERATION_TOP_P = 1.0f;
-    public static final boolean OPENAI_MODERATION_USE_HISTORY = false;
-    public static final boolean OPENAI_CHAT_MODEL = "gpt-4o-mini";
-    public static final int OPENAI_CHAT_N = 1;
-    public static final String OPENAI_CHAT_RESPONSE_FORMAT = "";
+    public static final String OPENAI_CHAT_MODEL = "gpt-4o-mini";
     public static final boolean OPENAI_CHAT_MODERATION_USE_HISTORY = false;
     public static final boolean OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY = false;
+    public static final String OPENAI_CHAT_RESPONSE_FORMAT = "";
     public static final String OPENAI_CHAT_STOP = "";
     public static final boolean OPENAI_CHAT_STORE = false;
     public static final boolean OPENAI_CHAT_STREAM = false;
@@ -110,7 +109,7 @@ public class Helpers {
         "uploads", "https://api.openai.com/v1/uploads"
     );
 
-    public static final Map<String, Integer> OPENAI_MODEL_CONTEXT_LIMITS = Map.of(
+    public static final Map<String, Integer> OPENAI_CHAT_MODEL_CONTEXT_LIMITS = Map.of(
         "ft:gpt-4o-mini-2024-07-18:spawd:vyrtuous:AjZpTNN2", 128000,
         "gpt-3.5-turbo", 4096,
         "gpt-4", 8192,
@@ -122,7 +121,7 @@ public class Helpers {
         "o1-mini", 128000
     );
 
-    public static final Map<String, Integer> OPENAI_MODEL_OUTPUT_LIMITS = Map.of(
+    public static final Map<String, Integer> OPENAI_CHAT_MODEL_OUTPUT_LIMITS = Map.of(
         "ft:gpt-4o-mini-2024-07-18:spawd:vyrtuous:AjZpTNN2", 16384,
         "gpt-3.5-turbo", 4096,
         "gpt-4", 8192,

@@ -59,30 +59,6 @@ public class EventListeners implements Cog, MessageCreateListener {
         api.addMessageCreateListener(this);
     }
 
-    // Send message to a server text channel (using the Message object)
-    public CompletableFuture<Message> sendMessage(Message message, String content, EmbedBuilder embed) {
-        return message.getServerTextChannel()
-                .map(channel -> channel.sendMessage(content, embed)) // Use .sendMessage with content and embed
-                .orElseThrow(() -> new IllegalArgumentException("Message is not in a server text channel."));
-    }
-
-    // Send a message to a private channel
-    public CompletableFuture<Message> sendMessage(PrivateChannel channel, String content, EmbedBuilder embed) {
-        return channel.sendMessage(content, embed); // Sending message to private channel
-    }
-
-    // Send message with a file to a server text channel
-    public CompletableFuture<Message> sendMessage(Message message, String content, File file, EmbedBuilder embed) {
-        return message.getServerTextChannel()
-                .map(channel -> channel.sendMessage(content, embed, file)) // Sending message with a file
-                .orElseThrow(() -> new IllegalArgumentException("Message is not in a server text channel."));
-    }
-
-    // Send message with a file to a private channel
-    public CompletableFuture<Message> sendMessage(PrivateChannel channel, String content, File file, EmbedBuilder embed) {
-        return channel.sendMessage(content, embed, file); // Sending message with a file to private channel
-    }
-
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
         Message message = event.getMessage();
@@ -126,7 +102,7 @@ public class EventListeners implements Cog, MessageCreateListener {
                             List<String> responses = aiManager.splitLongResponse(chatResponse, 1950);
                             String[] responsesArray = responses.toArray(new String[0]);
                             for (i = 0; i == responsesArray.length; i++) {
-                                messageManager.sendMessage(message, responsesArray[0]);
+                                messageManager.sendDiscordMessage(message, responsesArray[0]);
                             }
                         }
                     }

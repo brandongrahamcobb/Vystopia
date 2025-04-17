@@ -25,17 +25,18 @@ import java.util.concurrent.locks.Lock;
 
 public class Main {
 
+    public static DiscordBot bot;
     public static Config config;
     private static DiscordOAuth discordOAuth;
     public static HikariDataSource dbPool;
-    public static AIManager aiManager;
-    public static MessageManager messageManager;
-    public static Predicator predicator;
+    public static AIManager aiManager = new AIManager(config);
+    private static Helpers helpers;
+    public static MessageManager messageManager = new MessageManager(config, dbPool, helpers);
+    public static Predicator predicator = new Predicator(bot);
     public static Lock lock;
     public static final String oauthToken;
     public static Map<String, List<Map<String, String>>> conversations;
     public static final Logger logger = Logger.getLogger("Vyrtuous");
-    private static Helpers helpers;
 
     public static void main(String[] args) {
         try {
@@ -60,9 +61,9 @@ public class Main {
 //            System.out.println(twitchOAuth.getAuthorizationUrl());
 
             // Create bot instances
-            Object apiKeyObj = Config.getNestedConfigValue("api_keys", "Discord");
-            Map <String, Object> nestedConfig = (Map<String, Object>) apiKeyObj;
-            DiscordBot discordBot = new DiscordBot(logger, config, dbPool, aiManager, lock, messageManager, predicator, nestedConfig.get("api_key").toString());
+            Map<String, Object> apiKeysConfig = (Map<String, Object>) config.getConfigValue("api_keys"); // Retrieve "api_keys"
+            Map<String, Object> discordApiKeys = (Map<String, Object>) apiKeysConfig.get("Discord"); // Retrieve "Discord"
+            DiscordBot discordBot = new DiscordBot(logger, config, dbPool, aiManager, lock, messageManager, predicator, (String) discordApiKeys.get("api_key"));
 //            LinkedInBot linkedInBot = new LinkedInBot(config, linkedInOAuth.getAccessToken(), dataSource);
 //            TwitchBot twitchBot = new TwitchBot(config, twitchOAuth.getAccessToken(), dataSource);
 
@@ -102,6 +103,6 @@ public class Main {
     }
 
     public static HikariDataSource getDataSource() {
-        return dataSource;
+        return dbPool;
     }
 }

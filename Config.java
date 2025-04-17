@@ -11,11 +11,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.List;
 
 public class Config {
 
     private static Helpers helpers = new Helpers();
     public static Map<String, Object> config = new HashMap<>();
+    private static int i;
 
     static {
         loadConfig();
@@ -123,42 +125,95 @@ public class Config {
     }
 
     private static void promptAdditionalConfig(boolean creating) {
-        config.put("discord_character_limit", promptForString("Discord character limit?", String.valueOf(helpers.DISCORD_CHARACTER_LIMIT)));
+        config.put("discord_character_limit", promptForInt("Discord character limit?", String.valueOf(helpers.DISCORD_CHARACTER_LIMIT), 4000));
         config.put("discord_command_prefix", promptForString("Discord command prefix?", helpers.DISCORD_COMMAND_PREFIX));
         config.put("discord_moderation_warning", promptForString("What should be sent to users if their message was moderated?", helpers.DISCORD_MODERATION_WARNING));
-        config.put("discord_owner_id", promptForString("Discord Owner ID?", String.valueOf(helpers.DISCORD_OWNER_ID)));
-        config.put("discord_release_mode", promptForString("Discord release mode?", String.valueOf(helpers.DISCORD_RELEASE_MODE)));
-        config.put("discord_role_pass", promptForString("What is the role ID youd like unfiltered?", helpers.DISCORD_ROLE_PASS));
-        config.put("discord_testing_guild_id", promptForString("What is the Discord testing guild ID?", String.valueOf(helpers.DISCORD_TESTING_GUILD_ID)));
-        config.put("discord_testing_guild_ids", promptForString("Any extras?", String.valueOf(helpers.DISCORD_TESTING_GUILD_ID)));
+        config.put("discord_owner_id", promptForLong("Discord Owner ID?", helpers.DISCORD_OWNER_ID, 2000000000000000000L));
+        config.put("discord_release_mode", promptForYesNo("Discord release mode?", helpers.DISCORD_RELEASE_MODE));
+        config.put("discord_role_pass", promptForLong("What is the role ID youd like unfiltered?", helpers.DISCORD_ROLE_PASS, 2000000000000000000L));
+        config.put("discord_testing_guild_id", promptForLong("What is the Discord testing guild ID?", helpers.DISCORD_TESTING_GUILD_ID, 2000000000000000000L));
+        config.put("discord_testing_guild_ids", promptForLong("Any extras?", helpers.DISCORD_TESTING_GUILD_ID, 2000000000000000000L));
         config.put("discord_token", promptForString("What is the Discord token?", ""));
         config.put("logging_level", promptForString("What is the logging level (DEBUG, INFO, etc.)?", helpers.LOGGING_LEVEL));
-        config.put("openai_chat_add_completion_to_history", promptForString("Should completions be added to conversations?", String.valueOf(helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY)));
+        config.put("openai_chat_add_completion_to_history", promptForYesNo("Should completions be added to conversations?", helpers.OPENAI_CHAT_ADD_COMPLETION_TO_HISTORY));
         config.put("openai_chat_model", promptForString("Which chat model would you like to use for OpenAIs ChatGPT?", helpers.OPENAI_CHAT_MODEL));
         config.put("openai_chat_moderation_model", promptForString("Which OpenAI completions model would you like to use for moderation?", helpers.OPENAI_CHAT_MODERATION_MODEL));
-        config.put("openai_chat_completion", promptForString("Enable or disable OpenAI text completions (True/False)?", String.valueOf(helpers.OPENAI_CHAT_COMPLETION)));
-        config.put("openai_chat_moderation", promptForString("Enable or disable OpenAI text moderation (True/False)?", String.valueOf(helpers.OPENAI_CHAT_MODERATION)));
-        config.put("openai_chat_store", promptForString("Store OpenAI completions (True/False)?", String.valueOf(helpers.OPENAI_CHAT_STORE)));
-        config.put("openai_chat_stream", promptForString("Enable or disable OpenAI completions streaming (True/False)?", String.valueOf(helpers.OPENAI_CHAT_STREAM)));
+        config.put("openai_chat_completion", promptForYesNo("Enable or disable OpenAI text completions (True/False)?", helpers.OPENAI_CHAT_COMPLETION));
+        config.put("openai_chat_moderation", promptForYesNo("Enable or disable OpenAI text moderation (True/False)?", helpers.OPENAI_CHAT_MODERATION));
+        config.put("openai_chat_store", promptForYesNo("Store OpenAI completions (True/False)?", helpers.OPENAI_CHAT_STORE));
+        config.put("openai_chat_stream", promptForYesNo("Enable or disable OpenAI completions streaming (True/False)?", helpers.OPENAI_CHAT_STREAM));
         config.put("openai_chat_stop", promptForString("What might be the OpenAI stop criteria for completions?", helpers.OPENAI_CHAT_STOP));
-//        for (i = 0; i == OPENAI_CHAT_MODELS.length; i++) {
-        boolean exists = Arrays.asList(OPENAI_CHAT_MODELS["deprecated"]);
-        if (exists) {
-            config.put("openai_chat_sys_input", promptForString("What is the OpenAI completions system input?", helpers.OPENAI_CHAT_SYS_INPUT));
+        List<String> models = helpers.OPENAI_CHAT_MODELS.get("deprecated");
+        for (i = 0; i == models.size(); i++) {
+            if (models.get(i) == helpers.OPENAI_CHAT_MODEL) {
+                boolean exists = true;
+                if (exists) {
+                    config.put("openai_chat_sys_input", promptForString("What is the OpenAI completions system input?", helpers.OPENAI_CHAT_SYS_INPUT));
+                }
+                else {
+                    config.put("openai_chat_sys_input", promptForString("What is the OpenAI completions system input?", ""));
+                }
+                return;
+            }
         }
-        else {
-            config.put("openai_chat_sys_input", promptForString("What is the OpenAI completions system input?", ""));
-        }
-        config.put("openai_chat_temperature", promptForString("What is the OpenAI completions temperature (0.0 to 2.0)?", String.valueOf(helpers.OPENAI_CHAT_TEMPERATURE)));
-        config.put("openai_chat_top_p", promptForString("What should the top p be for OpenAI completions?", String.valueOf(helpers.OPENAI_CHAT_TOP_P)));
-        config.put("openai_chat_use_history", promptForString("Should OpenAI moderations use history?", String.valueOf(helpers.OPENAI_CHAT_USE_HISTORY)));
-        config.put("openai_chat_user", promptForString("What is your OpenAI username?", helpers.OPENAI_CHAT_USER));
-        config.put("openai_moderation_image", promptForString("Enable or disable OpenAI image moderation (True/False)?", String.valueOf(helpers.OPENAI_MODERATION_IMAGE)));
+        config.put("openai_chat_temperature", promptForFloat("What is the OpenAI completions temperature (0.0 to 2.0)?", helpers.OPENAI_CHAT_TEMPERATURE, 2.0f));
+        config.put("openai_chat_top_p", promptForFloat("What should the top p be for OpenAI completions?", helpers.OPENAI_CHAT_TOP_P, 1.0f));
+        config.put("openai_chat_use_history", promptForYesNo("Should OpenAI moderations use history?", helpers.OPENAI_CHAT_USE_HISTORY));
+        config.put("openai_chat_user", promptForYesNo("What is your OpenAI username?", helpers.OPENAI_CHAT_USER));
+        config.put("openai_moderation_image", promptForYesNo("Enable or disable OpenAI image moderation (True/False)?", helpers.OPENAI_MODERATION_IMAGE));
         config.put("openai_moderation_model", promptForString("Which model do you want for OpenAI image moderation?", helpers.OPENAI_MODERATION_MODEL));
         config.put("openai_organization", promptForString("What is the OpenAI-Organization ID?", helpers.OPENAI_CHAT_HEADERS.getOrDefault("OpenAI-Organization", "")));
         config.put("openai_project", promptForString("What is the OpenAI-Project ID?", helpers.OPENAI_CHAT_HEADERS.getOrDefault("OpenAI-Project", "")));
         config.put("user_agent", promptForString("What should be the User-Agent header?", helpers.USER_AGENT));
         config.put("version", promptForString("Would you like to override the bot version?", helpers.VERSION));
+    }
+
+    private static long promptForLong(String prompt, long defaultValue, long maxValue) {
+        long value;
+        long minValue = 0L;
+        while (true) {
+             try {
+                 System.out.print(prompt + " (default: " + defaultValue + "): ");
+                 String input = new Scanner(System.in).nextLine();
+     
+                 // Use the default value if the input is empty
+                 value = input.isEmpty() ? defaultValue : Long.parseLong(input);
+     
+                 // Check if the value is within the defined limits
+                 if (value >= minValue && value <= maxValue) {
+                     break; // Input is valid, exit the loop
+                 } else {
+                     System.out.println("Please enter a value between " + minValue + " and " + maxValue + ".");
+                 }
+             } catch (NumberFormatException e) {
+                 System.out.println("Invalid input. Please enter a valid number.");
+             }
+         }
+         return value; // Return the valid long value
+     }
+    private static float promptForFloat(String prompt, float defaultValue, float maxValue) {
+        float value;
+        float minValue = 0.0f; // System-defined minimum value for float
+    
+        while (true) {
+            try {
+                System.out.print(prompt + " (default: " + defaultValue + "): ");
+                String input = new Scanner(System.in).nextLine();
+    
+                // Use the default value if the input is empty
+                value = input.isEmpty() ? defaultValue : Float.parseFloat(input);
+    
+                // Check if the value is within the system-defined limits
+                if (value >= minValue && value <= maxValue) {
+                    break; // Input is valid, exit the loop
+                } else {
+                    System.out.println("Please enter a value between " + minValue + " and " + maxValue + ".");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+        return value; // Return the valid float value
     }
 
     private static String promptForString(String prompt, String defaultValue) {
@@ -167,28 +222,44 @@ public class Config {
         return input.isEmpty() ? defaultValue : input;
     }
 
-    private static int promptForInt(String prompt, int minValue, int maxValue) {
+    private static boolean promptForYesNo(String prompt, boolean defaultValue) {
+        while (true) {
+            System.out.print(prompt + " (default: " + defaultValue + ") [true/false]: ");
+            String input = new Scanner(System.in).nextLine().trim().toLowerCase();
+            if (input.isEmpty()) {
+                return defaultValue; // Return the default value if input is empty
+            } else if (input.equals("true") || input.equals("yes") || input.equals("1")) {
+                return true; // User input indicates true
+            } else if (input.equals("false") || input.equals("no") || input.equals("0")) {
+                return false; // User input indicates false
+            } else {
+                System.out.println("Invalid input. Please enter true/false, yes/no, or 1/0.");
+            }
+        }
+    }
+
+    private static int promptForInt(String prompt, int maxValue, int defaultValue) {
         int value;
+        int minValue = 0; // Set the minimum value to 0
+    
         while (true) {
             try {
-                System.out.print(prompt + " (default: " + minValue + "): ");
+                System.out.print(prompt + " (default: " + defaultValue + "): ");
                 String input = new Scanner(System.in).nextLine();
-                value = input.isEmpty() ? minValue : Integer.parseInt(input);
+    
+                // Use the default value if the input is empty
+                value = input.isEmpty() ? defaultValue : Integer.parseInt(input);
+    
+                // Check if the value is within the defined limits
                 if (value >= minValue && value <= maxValue) {
-                    break;
+                    break; // Input is valid, exit the loop
                 } else {
                     System.out.println("Please enter a value between " + minValue + " and " + maxValue + ".");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
+                System.out.println("Invalid input. Please enter a valid number.");
             }
         }
-        return value;
-    }
-
-    private static boolean promptForYesNo(String prompt) {
-        System.out.print(prompt);
-        String input = new Scanner(System.in).nextLine().trim().toLowerCase();
-        return input.equals("yes") || input.equals("y");
+        return value; // Return the valid integer value
     }
 }

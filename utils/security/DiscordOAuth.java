@@ -21,12 +21,17 @@ import java.util.Map;
 public class DiscordOAuth {
 
     private Config config;
-    private String clientId = config.getNestedConfigValue("api_keys", "Discord").get("api_key");
-    private String clientSecret = config.getNestedConfigValue("api_keys", "Discord").get("client_secret");
-    private String redirectUri = config.getNestedConfigValue("api_keys", "Discord").get("redirect_uri");
+    private final String clientId;
+    private final String clientSecret;
+    private final String redirectUri;
 
     public DiscordOAuth(Config config) {
         this.config = config;
+        Map<String, Object> configApiKeys = (Map<String, Object>) config.getConfigValue("api_keys"); // Retrieve "api_keys"
+        Map<String, Object> discordApiKeys = (Map<String, Object>) configApiKeys.get("Discord");
+        this.clientId = (String) discordApiKeys.get("api_key");
+        this.clientSecret = (String) discordApiKeys.get("client_secret");
+        this.redirectUri = (String) discordApiKeys.get("redirect_uri");
     }
 
 
