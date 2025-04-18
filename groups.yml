@@ -1,0 +1,486 @@
+# Group inheritance
+#
+# Any inherited groups prefixed with a g: are global groups
+# and are inherited from the GlobalGroups.yml.
+#
+# Groups without the g: prefix are groups local to this world
+# and are defined in the this groups.yml file.
+#
+# Local group inheritances define your promotion tree when using 'manpromote/mandemote'
+
+groups:
+  administrator:
+    default: false
+    permissions:
+    - essentials.*
+    - -essentials.banip
+    - -essentials.ban.offline
+    - -essentials.mute.offline
+    - -essentials.tempban.offline
+    - -essentials.togglejail
+    - -essentials.togglejail.offline
+    inheritance:
+    - vegan
+    info:
+      prefix: '&c[Admin]&r '
+
+  legacy:
+    default: false
+    permissions:
+    - essentials.back
+    - essentials.back.onteleport
+    - essentials.feed
+    - essentials.sethome.multiple.legacy
+    - essentials.home
+    - essentials.renamehome
+    - essentials.sethome.bed
+    - essentials.msg
+    - essentials.sethome
+    - essentials.spawn
+    - essentials.tpa
+    - essentials.tpaccept
+    - essentials.tpdeny
+    inheritance:
+    - everyone
+    info:
+      prefix: '&b[Legacy]&r '
+
+  everyone:
+    default: true
+    permissions:
+    - essentials.afk
+    - essential.afk.auto
+    - essentials.afk.message
+    - essentials.build.*
+    - essentials.discord.receive.primary
+    - essentials.help
+    - essentials.mail
+    - essentials.mail.send
+    - essentials.ping
+    - essentials.ptime
+    - essentials.pweather
+    - essentials.warp.get
+    - essentials.warp.list
+    - essentials.warpsign.sign
+    - essential.speed
+    - essential.speed.walk
+    - foodrestriction.eat.apple
+    - foodrestriction.eat.baked_potato
+    - foodrestriction.eat.beetroot
+    - foodrestriction.eat.beetroot_soup
+    - foodrestriction.eat.bread
+    - foodrestriction.eat.carrot
+    - foodrestriction.eat.chorus_fruit
+    - foodrestriction.eat.cookie
+    - foodrestriction.eat.dried_kelp
+    - foodrestriction.eat.enchanted_golden_apple
+    - foodrestriction.eat.glow_berries
+    - foodrestriction.eat.golden_apple
+    - foodrestriction.eat.golden_carrot
+    - foodrestriction.eat.melon_slice
+    - foodrestriction.eat.mushroom_stew
+    - foodrestriction.eat.poisonous_potato
+    - foodrestriction.eat.potato
+    - foodrestriction.eat.pumpkin_pie
+    - foodrestriction.eat.suspicious_stew
+    - foodrestriction.eat.sweet_berries
+    - ishop.create
+    - ishop.use
+    - ishop.find
+    - ishop.list
+    - ishop.move
+    - ishop.remotemanage
+    - ishop.shops
+    - ishop.stock
+    inheritance: []
+    info:
+      prefix: '&r'
+
+  iron:
+    default: false
+    permissions:
+    - essentials.chat.*
+    - esssentials.compass
+    - essentials.eco
+    - essentials.eco.*
+    - essentials.getpos
+    - essentials.itemdb
+    - essentials.itemlore
+    - essentials.itemname
+    - essentials.ignore
+    - essentials.motd
+    - essentials.msg
+    - essentials.msg.*
+    - essentials.msgtoggle
+    - essentials.pay
+    - essentials.payconfirmtoggle
+    - essentials.paytoggle
+    - essentials.r
+    - essentials.realname
+    - essentials.rtoggle
+    - essentials.sell
+    - essentials.sell.*
+    - essentials.signs.format
+    - essentials.signs.magic
+    - essentials.signs.use.*
+    - essentials.showkit
+    - essentials.time
+    - essentials.skull
+    - essentials.suicide
+    inheritance:
+    - everyone
+    info:
+      prefix: '&7[Iron]&r '
+
+  gold:
+    default: false
+    permissions:
+    - essentials.clearinventory
+    - essentials.condense
+    - essentials.disposal
+    inheritance:
+    - iron
+    info:
+      prefix: '&6[Gold]&r '
+
+  diamond:
+    default: false
+    permissions:
+    - essentials.broadcast
+    - essentials.broadcastworld
+    - essentials.hat
+    - essentials.ice
+    - essentials.invsee
+    - essentials.me
+    - essentials.nick
+    inheritance:
+    - gold
+    info:
+      prefix: '&b[Diamond]&r '
+
+  moderator:
+    default: false
+    permissions:
+    - essentials.*
+    - -essentials.ban
+    - -essentials.ban.*
+    - -essentials.banip
+    - -essentials.mute.offline
+    - -essentials.tempban.offline
+    - -essentials.togglejail
+    - -essentials.togglejail.offline
+    - -essentials.unban
+    - -essentials.unbanip
+    inheritance:
+    - everyone
+    info:
+      prefix: '&d[Moderator] &r'
+
+  owner:
+    default: false
+    permissions:
+    - '*'
+    inheritance: []
+    info:
+      prefix: '&4[Owner]&r '
+
+  troll:
+    default: false
+    permissions:
+    - -essentials
+    - -essentials.*
+    - -essentials.-essentials
+    - -essentials.-essentials.*
+    - -essentials.afk
+    - -essentials.afk.*
+    - -essentials.alts
+    - -essentials.antioch
+    - -essentials.anvil
+    - -essentials.back
+    - -essentials.back.*
+    - -essentials.backup
+    - -essentials.balance
+    - -essentials.balance.*
+    - -essentials.balancetop
+    - -essentials.balancetop.*
+    - -essentials.ban
+    - -essentials.ban.*
+    - -essentials.banip
+    - -essentials.banip.*
+    - -essentials.beezooka
+    - -essentials.bigtree
+    - -essentials.book
+    - -essentials.book.*
+    - -essentials.bottom
+    - -essentials.break
+    - -essentials.break.*
+    - -essentials.broadcast
+    - -essentials.broadcastworld
+    - -essentials.burn
+    - -essentials.cartographytable
+    - -essentials.clearinventory
+    - -essentials.clearinventory.*
+    - -essentials.clearinventoryconfirmtoggle
+    - -essentials.compass
+    - -essentials.condense
+    - -essentials.createkit
+    - -essentials.customtext
+    - -essentials.delhome
+    - -essentials.delhome.*
+    - -essentials.deljail
+    - -essentials.delkit
+    - -essentials.delwarp
+    - -essentials.depth
+    - -essentials.discord
+    - -essentials.discordbroadcast
+    - -essentials.discordbroadcast.*
+    - -essentials.disposal
+    - -essentials.eco
+    - -essentials.eco.*
+    - -essentials.editsign
+    - -essentials.editsign.*
+    - -essentials.enchant
+    - -essentials.enchant.*
+    - -essentials.enderchest
+    - -essentials.enderchest.*
+    - -essentials.exp
+    - -essentials.exp.*
+    - -essentials.ext
+    - -essentials.ext.*
+    - -essentials.feed
+    - -essentials.feed.*
+    - -essentials.fireball
+    - -essentials.fireball.*
+    - -essentials.firework
+    - -essentials.firework.*
+    - -essentials.fly
+    - -essentials.fly.*
+    - -essentials.gamemode
+    - -essentials.gamemode.*
+    - -essentials.gc
+    - -essentials.getpos
+    - -essentials.getpos.*
+    - -essentials.give
+    - -essentials.give.*
+    - -essentials.god
+    - -essentials.god.*
+    - -essentials.grindstone
+    - -essentials.hat
+    - -essentials.hat.*
+    - -essentials.heal
+    - -essentials.heal.*
+    - -essentials.help
+    - -essentials.help.*
+    - -essentials.helpop
+    - -essentials.helpop.*
+    - -essentials.home
+    - -essentials.home.*
+    - -essentials.ice
+    - -essentials.ice.*
+    - -essentials.ignore
+    - -essentials.info
+    - -essentials.invsee
+    - -essentials.invsee.*
+    - -essentials.item
+    - -essentials.item.*
+    - -essentials.itemdb
+    - -essentials.itemlore
+    - -essentials.itemname
+    - -essentials.itemname.*
+    - -essentials.jail
+    - -essentials.jail.*
+    - -essentials.jails
+    - -essentials.jump
+    - -essentials.jump.*
+    - -essentials.kick
+    - -essentials.kick.*
+    - -essentials.kickall
+    - -essentials.kickall.*
+    - -essentials.kill
+    - -essentials.kill.*
+    - -essentials.kit
+    - -essentials.kit.*
+    - -essentials.kitreset
+    - -essentials.kitreset.*
+    - -essentials.kittycannon
+    - -essentials.lightning
+    - -essentials.lightning.*
+    - -essentials.link
+    - -essentials.list
+    - -essentials.list.*
+    - -essentials.loom
+    - -essentials.mail
+    - -essentials.mail.*
+    - -essentials.me
+    - -essentials.me.*
+    - -essentials.more
+    - -essentials.more.*
+    - -essentials.motd
+    - -essentials.msg
+    - -essentials.msg.*
+    - -essentials.msgtoggle
+    - -essentials.msgtoggle.*
+    - -essentials.mute
+    - -essentials.mute.*
+    - -essentials.near
+    - -essentials.near.*
+    - -essentials.nick
+    - -essentials.nick.*
+    - -essentials.nuke
+    - -essentials.pay
+    - -essentials.pay.*
+    - -essentials.payconfirmtoggle
+    - -essentials.paytoggle
+    - -essentials.ping
+    - -essentials.playtime
+    - -essentials.playtime.*
+    - -essentials.potion
+    - -essentials.potion.*
+    - -essentials.powertool
+    - -essentials.powertool.*
+    - -essentials.powertooltoggle
+    - -essentials.ptime
+    - -essentials.ptime.*
+    - -essentials.pweather
+    - -essentials.pweather.*
+    - -essentials.r
+    - -essentials.realname
+    - -essentials.recipe
+    - -essentials.remove
+    - -essentials.renamehome
+    - -essentials.renamehome.*
+    - -essentials.repair
+    - -essentials.repair.*
+    - -essentials.rest
+    - -essentials.rest.*
+    - -essentials.rtoggle
+    - -essentials.rules
+    - -essentials.seen
+    - -essentials.seen.*
+    - -essentials.sell
+    - -essentials.sell.*
+    - -essentials.sethome
+    - -essentials.sethome.*
+    - -essentials.setjail
+    - -essentials.setspawn
+    - -essentials.settpr
+    - -essentials.setwarp
+    - -essentials.setwarp.*
+    - -essentials.setworth
+    - -essentials.setxmpp
+    - -essentials.showkit
+    - -essentials.skull
+    - -essentials.skull.*
+    - -essentials.smithingtable
+    - -essentials.socialspy
+    - -essentials.socialspy.*
+    - -essentials.spawn
+    - -essentials.spawn.*
+    - -essentials.spawner
+    - -essentials.spawner.*
+    - -essentials.spawnmob
+    - -essentials.spawnmob.*
+    - -essentials.speed
+    - -essentials.speed.*
+    - -essentials.stonecutter
+    - -essentials.sudo
+    - -essentials.sudo.*
+    - -essentials.suicide
+    - -essentials.tempban
+    - -essentials.tempban.*
+    - -essentials.tempbanip
+    - -essentials.thunder
+    - -essentials.time
+    - -essentials.time.*
+    - -essentials.togglejail
+    - -essentials.togglejail.*
+    - -essentials.top
+    - -essentials.tp
+    - -essentials.tp.*
+    - -essentials.tpa
+    - -essentials.tpa.*
+    - -essentials.tpaall
+    - -essentials.tpaall.*
+    - -essentials.tpacancel
+    - -essentials.tpaccept
+    - -essentials.tpahere
+    - -essentials.tpahere.*
+    - -essentials.tpall
+    - -essentials.tpall.*
+    - -essentials.tpauto
+    - -essentials.tpauto.*
+    - -essentials.tpdeny
+    - -essentials.tphere
+    - -essentials.tphere.*
+    - -essentials.tpo
+    - -essentials.tpo.*
+    - -essentials.tpoffline
+    - -essentials.tpohere
+    - -essentials.tpohere.*
+    - -essentials.tppos
+    - -essentials.tpr
+    - -essentials.tptoggle
+    - -essentials.tptoggle.*
+    - -essentials.tree
+    - -essentials.unban
+    - -essentials.unban.*
+    - -essentials.unbanip
+    - -essentials.unbanip.*
+    - -essentials.unlimited
+    - -essentials.unlimited.*
+    - -essentials.unlink
+    - -essentials.vanish
+    - -essentials.vanish.*
+    - -essentials.warp
+    - -essentials.warp.*
+    - -essentials.warpinfo
+    - -essentials.weather
+    - -essentials.whitelist
+    - -essentials.whois
+    - -essentials.whois.*
+    - -essentials.workbench
+    - -essentials.world
+    - -essentials.world.*
+    - -essentials.worth
+    - -essentials.xmpp
+    - -essentials.xmppspy
+    inheritance: []
+    info:
+      prefix: '&7[Troll]&r '
+
+  super_vegan:
+    default: false
+    permissions:
+    - essentials.*
+    - -essentials.banip
+    - -essentials.ban.offline
+    - -essentials.mute.offline
+    - -essentials.tempban.offline
+    - -essentials.togglejail
+    - -essentials.togglejail.offline
+    inheritance:
+    - vegan
+    info:
+      prefix: '&2[Vegan]&r '
+
+  vegan:
+    default: false
+    permissions:
+    - keepinv.toggle
+    - essentials.*
+    - -essentials.ban
+    - -essentials.ban.*
+    - -essentials.banip
+    - -essentials.delwarp
+    - -essential.keepinv
+    - -essentials.mute.offline
+    - -essentials.tempban.offline
+    - -essentials.togglejail
+    - -essentials.togglejail.offline
+    - -essentials.unban
+    - -essentials.unbanip
+    inheritance:
+    - everyone
+    info:
+      prefix: '&2[Vegan]&r '
+

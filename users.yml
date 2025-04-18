@@ -1,0 +1,25 @@
+users:
+  59123771-1902-4b86-8ddb-ed855e631515:
+    lastname: Spawd
+    group: owner
+    subgroups: []
+    permissions:
+    - -essentials.keepinv
+    - essentials.afk.kickexempt
+    - essentials.ban.exempt
+    - essentials.chat.ignoreexempt
+    - essentials.chat.spy.exempt
+    - essentials.command.cooldowns.bypass
+    - essentials.editsign.waxed.exempt
+    - essentials.kick.exempt
+    - essentials.kickall.exempt
+    - essentials.kill.exempt
+    - essentials.kit.exemptdelay
+    - essentials.mute.exempt
+    - essentials.near.maxexempt
+    - essentials.protect.exemptbreak
+    - essentials.protect.exemptplacement
+    - essentials.pvpdelay.exempt
+    - essentials.spawn-on-join.exempt
+    - essentials.sudo.exempt
+    - essentials.tempban.exempt
