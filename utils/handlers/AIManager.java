@@ -83,11 +83,11 @@ public class AIManager {
                 post.setHeader("Content-Type", "application/json");
     
                 Map<String, Object> requestBody = new HashMap<>();
-                requestBody.put("add_completions_to_history", addCompletionToHistory);
-                requestBody.put("completions", n);
+                requestBody.put("n", n);
                 requestBody.put("max_tokens", maxTokens);
                 requestBody.put("temperature", temperature);
                 requestBody.put("model", model);
+                requestBody.put("response_format", responseFormat);
                 requestBody.put("stop", stop);
                 requestBody.put("store", store);
                 requestBody.put("top_p", top_p);
@@ -97,6 +97,7 @@ public class AIManager {
                 for (MessageContent messageContent : messages) {
                     Map<String, Object> messageMap = new HashMap<>();
                     messageMap.put("role", messageContent.getType()); // Assuming getType() returns the role ("user" or "assistant")
+                    System.out.println(messageContent.getType());
                     messageMap.put("content", messageContent.getText()); // Assuming getText() returns the message content
                     messagesList.add(messageMap);
                 }
@@ -120,7 +121,8 @@ public class AIManager {
                 try (CloseableHttpResponse response = httpClient.execute(post)) {
                     HttpEntity entity = response.getEntity();
                     String result = EntityUtils.toString(entity);
-                    return extractCompletion(result);
+                    String completionResult = extractCompletion(result);
+                    return completionResult;
                 }
             } catch (IOException e) {
                 // Handle exceptions appropriately
@@ -129,17 +131,6 @@ public class AIManager {
         });
     }
 
-   // Convert List<MessageContent> to List<Map<String, Object>>
-    private List<Map<String, Object>> convertMessageContentToMap(List<MessageContent> messages) {
-        List<Map<String, Object>> mapList = new ArrayList<>();
-        for (MessageContent msgContent : messages) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("role", msgContent.getType()); // Assuming getType() returns the role
-            map.put("content", msgContent.getText()); // Assuming getText() returns the content
-            mapList.add(map);
-        }
-        return mapList;
-    }
 
     public CompletableFuture<String> getCompletion(long customId, CompletableFuture<List<MessageContent>> inputArray) {
 //        return inputArray.thenApply(messages -> {
@@ -173,47 +164,45 @@ public class AIManager {
     }
 
     public CompletableFuture<String> getChatModerationCompletion(long customId, CompletableFuture<List<MessageContent>> inputArray) throws IOException {
-        return inputArray.thenApply(messages -> {
+//        return inputArray.thenApply(messages -> {
             //List<Map<String, Object>> mapList = new ArrayList<>();
             //for (MessageContent msgContent : messages) {
               //   Map<String, Object> map = new HashMap<>();
                 //map.put("role", msgContent.getType()); // or whatever you use for the role
                // map.put("content", msgContent.getText()); // assuming MessageContent has a method getText()
                 //mapList.add(map);
-                return messages;
-        }).thenCompose(messages -> {
-            try {
-                return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_MODERATION_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
-            } catch (IOException ioe) {}
-            return null;
-        });
+      //          return messages;
+  //      }).thenCompose(messages -> {
+        try {
+            return getChatCompletion(helpers.OPENAI_CHAT_N, customId, inputArray, helpers.OPENAI_CHAT_MODEL_OUTPUT_LIMITS.get(config.getStringValue("openai_chat_model")), config.getStringValue("openai_chat_model"), helpers.OPENAI_CHAT_MODERATION_RESPONSE_FORMAT, config.getStringValue("openai_chat_stop"), config.getBooleanValue("openai_chat_stream"), helpers.OPENAI_CHAT_MODERATION_SYS_INPUT, config.getFloatValue("openai_chat_temperature"), config.getFloatValue("openai_chat_top_p"), helpers.OPENAI_CHAT_MODERATION_USE_HISTORY, helpers.OPENAI_CHAT_MODERATION_ADD_COMPLETION_TO_HISTORY);
+        } catch (IOException ioe) {}
+        return null;
+       // });
     }
 
+//    private Map<String, Object> extractCompletion(String jsonResponse) throws IOException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        // Deserialize into Map<String, Object>
+//        Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, new HashMap<String, Object>().getClass()); // Alternative method without TypeReference
+//    
+//        if (!responseMap.containsKey("choices")) {
+//            throw new IllegalArgumentException("Response does not contain 'choices'.");
+//        }
+//        
+//        // Handle the remainder of your processing
+//        return responseMap;
+//    }
+//33a
     private String extractCompletion(String jsonResponse) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, Map.class);
-    
-        // Check if "choices" exists and is not null
-        if (!responseMap.containsKey("choices") || responseMap.get("choices") == null) {
-            throw new IllegalArgumentException("Response does not contain 'choices'. Response: " + jsonResponse);
-        }
-    
-        // Get the choices list from the response
         List<Map<String, Object>> choices = (List<Map<String, Object>>) responseMap.get("choices");
-    
-        if (choices.isEmpty()) {
-            throw new IllegalArgumentException("The 'choices' list is empty. Response: " + jsonResponse);
-        }
-    
-        // Get the first choice
         Map<String, Object> firstChoice = choices.get(0);
-    
-        // Get the message map
         Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
-    
-        // Get the content from the message
         return (String) message.get("content"); // Cast to String
     }
+    
+        // Check if "choices" exists and is not null
 
     public static List<String> splitLongResponse(String response, int limit) {
         List<String> outputChunks = new ArrayList<>();

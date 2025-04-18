@@ -1,5 +1,7 @@
 package com.brandongcobb.vyrtuous.cogs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
 import com.brandongcobb.vyrtuous.bots.DiscordBot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -86,27 +88,33 @@ public class EventListeners implements Cog, MessageCreateListener {
                CompletableFuture<String> moderationResponse = aiManager.getChatModerationCompletion(sender.getId(), inputArray);
                moderationResponse.thenAccept(response -> {
                    try {
-                       List<Map<String, Object>> fullResponse = convertStringToList(response);
-                       List<Map<String, Object>> results = (List<Map<String, Object>>) fullResponse.get(0).get("results");
-                       
+                       // Assuming response is a JSON string representation
+                       Map<String, Object> responseMap = mapper.readValue(response, new HashMap<String, Object>().getClass());
+               
+                       // Extract results from the response
+                       List<Map<String, Object>> results = (List<Map<String, Object>>) responseMap.get("results");
+               
+                       // Check for results being present and not empty
                        if (results != null && !results.isEmpty()) {
-                           Map<String, Object> result = results.get(0);
-                           flagged = (boolean) result.get("flagged");
-                           List<Map<String, Boolean>> categories = (List<Map<String, Boolean>>) result.get("Categories");
-                           for (Map<String, Boolean> categoryMap : categories) {
-                               for (Map.Entry<String, Boolean> entry : categoryMap.entrySet()) {
-                                   if (Boolean.TRUE.equals(entry.getValue())) {
-                                       String category = entry.getKey()
-                                          .replace("/", " → ")
-                                          .replace("-", " ");
-                                       category = capitalize(category);
-                                       reasons.add(category);
-                                   }
+                           Map<String, Object> result = results.get(0); // Get the first result
+                           
+                           // Extract flagged value
+                           boolean flagged = (boolean) result.get("flagged");
+               
+                           // Extract categories
+                           Map<String, Boolean> categories = (Map<String, Boolean>) result.get("categories");
+                           for (Map.Entry<String, Boolean> entry : categories.entrySet()) {
+                               if (Boolean.TRUE.equals(entry.getValue())) {
+                                   String category = entry.getKey()
+                                       .replace("/", " → ")
+                                       .replace("-", " ");
+                                   category = capitalize(category);
+                                   reasons.add(category); // Assuming reasons is defined in your scope
                                }
                            }
                        }
                    } catch (IOException e) {
-                       e.printStackTrace(); // Log the exception or handle it accordingly
+                       e.printStackTrace(); // Log the exception
                    }
                }).exceptionally(e -> {
                    e.printStackTrace(); // Handle any exception that occurs in the CompletableFuture

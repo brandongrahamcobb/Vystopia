@@ -103,7 +103,7 @@ public class MessageManager {
    }
 
     public CompletableFuture<List<MessageContent>> processTextMessage(String content) {
-        return CompletableFuture.completedFuture(List.of(new MessageContent("text", content.replace("<@1318597210119864385>", ""))));
+        return CompletableFuture.completedFuture(List.of(new MessageContent("user", content.replace("<@1318597210119864385>", ""))));
     }
 
     public boolean validateArray(List<MessageContent> array) {
