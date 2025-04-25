@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.brandongcobb</groupId>
+    <artifactId>Vystopia</artifactId>
+    <version>0.1</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>modules/Vyrtuous</module>
+        <module>modules/FoodRestriction</module>
+        <module>modules/PatreonPlugin</module>
+    </modules>
+
+    <profiles>
+        <profile>
+            <id>Vyrtuous</id>
+            <modules>
+                <module>modules/Vyrtuous</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>FoodRestriction</id>
+            <modules>
+                <module>modules/FoodRestriction</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>PatreonPlugin</id>
+            <modules>
+                <module>modules/PatreonPlugin</module>
+            </modules>
+        </profile>
+    </profiles>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+    <url>www.github.com/brandongrahamcobb</url>
+
+</project>
