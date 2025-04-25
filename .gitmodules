@@ -1,0 +1,3 @@
+[submodule "modules/jVyrtuous"]
+	path = modules/jVyrtuous
+	url = https://github.com/brandongrahamcobb/jVyrtuous.git

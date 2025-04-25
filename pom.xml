@@ -10,18 +10,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>modules/Vyrtuous</module>
         <module>modules/FoodRestriction</module>
-        <module>modules/PatreonPlugin</module>
+        <module>modules/jVyrtuous</module>
     </modules>
 
     <profiles>
-        <profile>
-            <id>Vyrtuous</id>
-            <modules>
-                <module>modules/Vyrtuous</module>
-            </modules>
-        </profile>
         <profile>
             <id>FoodRestriction</id>
             <modules>
@@ -29,9 +22,9 @@
             </modules>
         </profile>
         <profile>
-            <id>PatreonPlugin</id>
+            <id>jVyrtuous</id>
             <modules>
-                <module>modules/PatreonPlugin</module>
+                <module>modules/jVyrtuous</module>
             </modules>
         </profile>
     </profiles>
