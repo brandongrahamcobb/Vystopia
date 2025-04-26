@@ -12,25 +12,28 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class PlayerInteract implements Listener {
-   @EventHandler
-   public void onPlayerJoin(PlayerJoinEvent event) {
-   }
 
-   @EventHandler
-   public void onPlayerInteract(PlayerInteractEvent event) {
-      if (event.getHand() != EquipmentSlot.OFF_HAND) {
-         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
-            Player player = event.getPlayer();
-            ItemStack item = player.getInventory().getItemInMainHand();
-            String itemName = item.getType().toString().toLowerCase(Locale.ROOT);
-            if (FoodRestriction.plugin.foodList.contains(itemName)) {
-               if (!player.hasPermission("foodrestriction.eat." + itemName)) {
-                  player.sendMessage("You are not allowed to eat this food: " + itemName.replace("_", " ") + ".");
-                  event.setCancelled(true);
-               }
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        // Only process if the event is using main hand
+        if (event.getHand() != EquipmentSlot.OFF_HAND) {
+            // Trigger only when right-clicking (air or block)
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+                Player player = event.getPlayer();
 
+                // Get item in main hand
+                ItemStack item = player.getInventory().getItemInMainHand();
+
+                if (item == null || item.getType() == null) return;
+
+                String itemName = item.getType().toString().toLowerCase(Locale.ROOT);
+
+                // Check against the nonVeganList
+                if (FoodRestriction.plugin.nonVeganList.contains(itemName)) {
+                    player.sendMessage("You are not allowed to eat this non-vegan food: " + itemName.replace("_", " ") + ".");
+                    event.setCancelled(true);
+                }
             }
-         }
-      }
-   }
+        }
+    }
 }
